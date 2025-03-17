@@ -1,0 +1,32 @@
+.idea
+.vscode
+env.json
+env
+coverage.out
+data
+.log
+node_modules
+.vite
+.env
+node_modules
+contracts/.env
+# Hardhat files
+/cache
+/artifacts
+/contracts/artifacts
+/contracts/cache
+/contracts/typechain-types
+# TypeChain files
+/typechain
+/typechain-types
+
+# solidity-coverage files
+/coverage
+/coverage.json
+
+# Hardhat Ignition default folder for deployments against a local node
+ignition/deployments/chain-31337
+pkg/testHashes.json
+pkg/helper.go
+~
+nohup.out

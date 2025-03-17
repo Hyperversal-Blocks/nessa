@@ -1,0 +1,531 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "description": "Automatically generated API documentation.",
+    "title": "Keyless-Auth",
+    "contact": {
+      "name": "Hackathon@Encode",
+      "url": "https://example.com"
+    },
+    "license": {
+      "name": "MIT",
+      "url": "https://opensource.org/licenses/MIT"
+    },
+    "version": "1.1.1"
+  },
+  "host": "localhost:8081",
+  "basePath": "/",
+  "schemes": [
+    "http"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/auth/google/callback": {
+      "get": {
+        "summary": "Endpoint /auth/google/callback",
+        "description": "Automatically generated endpoint for /auth/google/callback",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/auth/google/login": {
+      "get": {
+        "summary": "Endpoint /auth/google/login",
+        "description": "Automatically generated endpoint for /auth/google/login",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/challenge": {
+      "post": {
+        "summary": "Endpoint /challenge",
+        "description": "Automatically generated endpoint for /challenge",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/VerifyChallengeRequest"
+            },
+            "description": "VerifyChallengeRequest object"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/challenge/verify": {
+      "post": {
+        "summary": "Endpoint /challenge/verify",
+        "description": "Automatically generated endpoint for /challenge/verify",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/VerifyChallengeRequest"
+            },
+            "description": "VerifyChallengeRequest object"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/credentials": {
+      "post": {
+        "summary": "Endpoint /credentials",
+        "description": "Automatically generated endpoint for /credentials",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/generate-tree-object": {
+      "post": {
+        "summary": "Endpoint /generate-tree-object",
+        "description": "Automatically generated endpoint for /generate-tree-object",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/merkle-proof/{credential}": {
+      "get": {
+        "summary": "Endpoint /merkle-proof/{credential}",
+        "description": "Automatically generated endpoint for /merkle-proof/{credential}",
+        "parameters": [
+          {
+            "name": "credential",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Auto-detected path parameter"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/merkle-root": {
+      "get": {
+        "summary": "Endpoint /merkle-root",
+        "description": "Automatically generated endpoint for /merkle-root",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/proof": {
+      "post": {
+        "summary": "Endpoint /proof",
+        "description": "Automatically generated endpoint for /proof",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ProofRequest"
+            },
+            "description": "ProofRequest object"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ]
+      }
+    }
+  },
+  "securityDefinitions": {
+    "ApiKeyAuth": {
+      "type": "apiKey",
+      "name": "X-API-KEY",
+      "in": "header",
+      "description": "Use an API key to authenticate requests."
+    }
+  },
+  "definitions": {
+    "ChallengePayloadResp": {
+      "type": "object",
+      "properties": {
+        "challenge": {
+          "type": "string"
+        },
+        "ephemeral_pub_key": {
+          "type": "string"
+        },
+        "hashed_signature": {
+          "type": "string"
+        },
+        "signature": {
+          "type": "string"
+        }
+      }
+    },
+    "ChallengeReq": {
+      "type": "object",
+      "properties": {
+        "public_key": {
+          "type": "string"
+        }
+      }
+    },
+    "CredentialRequest": {
+      "type": "object",
+      "properties": {
+        "hashed_credential": {
+          "type": "string"
+        },
+        "user_id": {
+          "type": "string"
+        }
+      }
+    },
+    "CredentialResponse": {
+      "type": "object",
+      "properties": {
+        "leaf": {
+          "type": "string"
+        },
+        "merkle_root": {
+          "type": "string"
+        },
+        "proof": {
+          "type": "object"
+        },
+        "wallet_address": {
+          "type": "string"
+        }
+      }
+    },
+    "GenerateTreeRequest": {
+      "type": "object",
+      "properties": {
+        "hashed_credential": {
+          "type": "string"
+        }
+      }
+    },
+    "GenerateTreeResponse": {
+      "type": "object",
+      "properties": {
+        "object": {
+          "type": "object"
+        }
+      }
+    },
+    "KeyExchangeLoginByChallengeResponse": {
+      "type": "object",
+      "properties": {
+        "hashed_key": {
+          "type": "string"
+        }
+      }
+    },
+    "KeyExchangeLoginBySignatureResponse": {
+      "type": "object",
+      "properties": {
+        "signature": {
+          "type": "string"
+        }
+      }
+    },
+    "KeyExchangeLoginRequest": {
+      "type": "object",
+      "properties": {
+        "public_key": {
+          "type": "string"
+        }
+      }
+    },
+    "MerkleProofResponse": {
+      "type": "object",
+      "properties": {
+        "proof": {
+          "type": "object"
+        }
+      }
+    },
+    "MerkleRootResponse": {
+      "type": "object",
+      "properties": {
+        "merkle_root": {
+          "type": "string"
+        },
+        "num_leaves": {
+          "type": "integer"
+        }
+      }
+    },
+    "ProofRequest": {
+      "type": "object",
+      "properties": {
+        "leaf": {
+          "type": "string",
+          "description": "Leaf hash\n"
+        },
+        "position": {
+          "type": "integer",
+          "description": "Position (0 = left, 1 = right)\n"
+        },
+        "root": {
+          "type": "string",
+          "description": "Merkle root\n"
+        },
+        "siblings": {
+          "type": "array",
+          "description": "Sibling hashes\n",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "ProofResponse": {
+      "type": "object",
+      "properties": {
+        "proof": {
+          "type": "object"
+        }
+      }
+    },
+    "Response": {
+      "type": "object",
+      "properties": {
+        "description": {
+          "type": "string"
+        },
+        "schema": {
+          "type": "object"
+        }
+      }
+    },
+    "VerifyChallengeRequest": {
+      "type": "object",
+      "properties": {
+        "challenger_pk": {
+          "type": "string"
+        },
+        "decrypted_challenge": {
+          "type": "string"
+        },
+        "ephemeral_pk": {
+          "type": "string"
+        },
+        "signature": {
+          "type": "string"
+        },
+        "ttl": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "VerifyChallengeResponse": {
+      "type": "object",
+      "properties": {
+        "public_key": {
+          "type": "string"
+        },
+        "session_token": {
+          "type": "string"
+        }
+      }
+    },
+    "WithKeyExchangeResponse": {
+      "type": "object",
+      "properties": {
+        "hashed_key": {
+          "type": "string"
+        },
+        "hashed_signature": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}
