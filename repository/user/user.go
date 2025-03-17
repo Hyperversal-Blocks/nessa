@@ -4,7 +4,7 @@ import (
 	"context"
 	"sync"
 
-	"keyless-auth/services"
+	"github.com/hblocks/nessa/services"
 )
 
 type repository struct {

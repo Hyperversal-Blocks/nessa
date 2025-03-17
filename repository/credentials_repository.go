@@ -9,7 +9,7 @@ import (
 
 	"github.com/redis/go-redis/v9"
 
-	"keyless-auth/services"
+	"github.com/hblocks/nessa/services"
 )
 
 // CredentialsRepository manages credential<->wallet<->user data.

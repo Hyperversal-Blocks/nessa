@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"keyless-auth/circuit"
-	"keyless-auth/domain"
-	"keyless-auth/repository"
+	"github.com/hblocks/nessa/circuit"
+	"github.com/hblocks/nessa/domain"
+	"github.com/hblocks/nessa/repository"
 
 	"github.com/consensys/gnark/backend/groth16"
 )

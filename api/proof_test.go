@@ -10,7 +10,7 @@ import (
 	"github.com/consensys/gnark/frontend"
 	"github.com/consensys/gnark/frontend/cs/r1cs"
 
-	"keyless-auth/circuit"
+	"github.com/hblocks/nessa/circuit"
 )
 
 func TestCompile(t *testing.T) {

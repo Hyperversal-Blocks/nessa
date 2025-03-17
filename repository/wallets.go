@@ -3,7 +3,7 @@ package repository
 import (
 	"sync"
 
-	"keyless-auth/services"
+	"github.com/hblocks/nessa/services"
 )
 
 type walletRepo struct {

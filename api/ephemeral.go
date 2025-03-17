@@ -14,9 +14,9 @@ import (
 	"github.com/google/uuid"
 	"github.com/redis/go-redis/v9"
 
-	"keyless-auth/repository/session"
-	"keyless-auth/repository/user"
-	"keyless-auth/signer"
+	"github.com/hblocks/nessa/repository/session"
+	"github.com/hblocks/nessa/repository/user"
+	"github.com/hblocks/nessa/signer"
 )
 
 // [WIP]

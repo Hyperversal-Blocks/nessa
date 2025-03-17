@@ -11,7 +11,7 @@ import (
 	"github.com/ethereum/go-ethereum/crypto"
 	"golang.org/x/crypto/sha3"
 
-	"keyless-auth/signer/signerMock"
+	"github.com/hblocks/nessa/signer/signerMock"
 )
 
 func DefaultMockOptions(t *testing.T) []signerMock.Option {

@@ -11,7 +11,7 @@ import (
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
 
-	"keyless-auth/repository/user"
+	"github.com/hblocks/nessa/repository/user"
 )
 
 type GoogleHandler struct {

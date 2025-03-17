@@ -341,7 +341,7 @@ func BuildOpenAPISpec(router *mux.Router) (*SwaggerObject, error) {
 		Swagger: "2.0",
 		Info: InfoObject{
 			Description: "Automatically generated API documentation.",
-			Title:       "Keyless-Auth",
+			Title:       "github.com/hblocks/nessa",
 			Contact: Contact{
 				Name: "Hackathon@Encode",
 				URL:  "https://example.com",

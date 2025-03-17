@@ -12,9 +12,9 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/wealdtech/go-merkletree"
 
-	"keyless-auth/repository"
-	"keyless-auth/repository/user"
-	"keyless-auth/service"
+	"github.com/hblocks/nessa/repository"
+	"github.com/hblocks/nessa/repository/user"
+	"github.com/hblocks/nessa/service"
 )
 
 type GenerateTreeRequest struct {

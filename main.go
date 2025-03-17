@@ -10,13 +10,13 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/redis/go-redis/v9"
 
-	"keyless-auth/api"
-	_ "keyless-auth/api/docs"
-	"keyless-auth/repository"
-	"keyless-auth/repository/session"
-	"keyless-auth/repository/user"
-	"keyless-auth/services"
-	"keyless-auth/signer"
+	"github.com/hblocks/nessa/api"
+	_ "github.com/hblocks/nessa/api/docs"
+	"github.com/hblocks/nessa/repository"
+	"github.com/hblocks/nessa/repository/session"
+	"github.com/hblocks/nessa/repository/user"
+	"github.com/hblocks/nessa/services"
+	"github.com/hblocks/nessa/signer"
 )
 
 var (

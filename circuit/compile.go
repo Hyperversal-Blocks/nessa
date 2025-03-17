@@ -5,7 +5,7 @@ import (
 	"math/big"
 	"strconv"
 
-	"keyless-auth/domain"
+	"github.com/hblocks/nessa/domain"
 
 	"github.com/consensys/gnark-crypto/ecc"
 	"github.com/consensys/gnark/backend/groth16"

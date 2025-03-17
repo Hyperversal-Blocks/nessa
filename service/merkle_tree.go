@@ -10,7 +10,7 @@ import (
 	"github.com/wealdtech/go-merkletree"
 	"github.com/wealdtech/go-merkletree/keccak256"
 
-	"keyless-auth/repository"
+	"github.com/hblocks/nessa/repository"
 )
 
 type MerkleTreeService struct {

@@ -2,7 +2,7 @@
   "swagger": "2.0",
   "info": {
     "description": "Automatically generated API documentation.",
-    "title": "Keyless-Auth",
+    "title": "github.com/hblocks/nessa",
     "contact": {
       "name": "Hackathon@Encode",
       "url": "https://example.com"
