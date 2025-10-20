@@ -64,3 +64,22 @@ Optional range or bit-decomposition constraints can also be enforced on hidden v
 The security of the scheme reduces to the discrete logarithm assumption on the chosen curve and the knowledge soundness of the inner-product argument. Important engineering practices include using constant-time scalar arithmetic and deterministic nonce derivation for any adjacent cryptographic steps. The choice of curve, such as Ristretto/Ed25519 or **P-256**/secp256r1, depends on the specific deployment requirements.
 
 For a potential integration, qFold-EC could be used as a plug-in verifier in an authentication MVP. A server-side engine would verify folded proofs accompanying register or login requests. An in-memory store would keep only the latest folded object and per-user policy state.
+
+## qFold-PQ 
+qfold-pq is out of scope for the objectives outlined for **GG24 Privacy Round** dated **Oct 20th, 2025**. 
+
+## Threat Model & Properties
+
+- Adversaries: Active network attackers, malicious verifiers, and device compromise with recovery.
+
+- Unforgeability: From commitment binding + proof soundness.
+
+- Zero‑knowledge: Verifier learns only policy results; count/order/timing of events remain hidden unless explicitly 
+encoded.
+
+- Non‑malleability: Challenges bind the entire prefix + domain tags; splicing/mix‑and‑match fails.
+
+- Forward security: Fresh randomness and epoch tags invalidate old openings; prior states can’t be replayed.
+
+- Side‑channels: Constant‑time scalar arithmetic (EC), constant‑time NTT/sampling where applicable (PQ). Avoid 
+data‑dependent memory access in MSM/NTT.
