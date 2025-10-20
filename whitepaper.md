@@ -35,7 +35,11 @@ A transcript consists of a series of events $\{e_i\}_{i=1}^N$. Each event is enc
 
 Challenges are derived incrementally using the Fiat-Shamir heuristic as $\alpha_i = \mathsf{Chal}(C_1, \dots, C_i, \mathrm{tags})$. The tags include domain separation information such as an application ID, policy hash, epoch, and purpose.
 
-The folded commitment is a single value $C^\star$ calculated as a random linear combination of the individual commitments.$$C^\star = \bigoplus_{i=1}^{N} \alpha_i \cdot C(m_i; r_i) = C\left(\sum_i \alpha_i m_i ; \sum_i \alpha_i r_i\right)$$The prover supplies a folded proof $\pi$. This proof demonstrates that the hidden vector $\sum_i \alpha_i m_i$ is a valid linear combination of individually well-formed encodings $m_i \in L_{\mathcal{P}}$ and lies in the language induced by the policy. This is done without revealing any individual $m_i$ or the total number of events $N$. This can be realized with a sigma-protocol folded via inner-product arguments.
+The folded commitment is a single value $C^\star$ calculated as a random linear combination of the individual commitments. 
+
+$$C^\star = \bigoplus_{i=1}^{N} \alpha_i \cdot C(m_i; r_i) = C\left(\sum_i \alpha_i m_i ; \sum_i \alpha_i r_i\right)$$ 
+
+The prover supplies a folded proof $\pi$. This proof demonstrates that the hidden vector $\sum_i \alpha_i m_i$ is a valid linear combination of individually well-formed encodings $m_i \in L_{\mathcal{P}}$ and lies in the language induced by the policy. This is done without revealing any individual $m_i$ or the total number of events $N$. This can be realized with a sigma-protocol folded via inner-product arguments.
 
 A verifier checks the final object and either accepts or rejects it. The check is represented as $(C^\star, \pi, \mathsf{pk}, \mathcal{P}) \to \{\text{accept, reject}\}$.
 
