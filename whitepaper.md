@@ -41,6 +41,26 @@ $$C^\star = \bigoplus_{i=1}^{N} \alpha_i \cdot C(m_i; r_i) = C\left(\sum_i \alph
 
 The prover supplies a folded proof $\pi$. This proof demonstrates that the hidden vector $\sum_i \alpha_i m_i$ is a valid linear combination of individually well-formed encodings $m_i \in L_{\mathcal{P}}$ and lies in the language induced by the policy. This is done without revealing any individual $m_i$ or the total number of events $N$. This can be realized with a sigma-protocol folded via inner-product arguments.
 
-A verifier checks the final object and either accepts or rejects it. The check is represented as $(C^\star, \pi, \mathsf{pk}, \mathcal{P}) \to \{\text{accept, reject}\}$.
+A verifier checks the final object and either accepts or rejects it. The check is represented as $(C^{\star}, \pi, \mathsf{pk}, \mathcal{P}) \rightarrow \{\text{accept, reject}\}$.
 
 Soundness reduces to the binding property of the commitment scheme $C$ and the knowledge soundness of the folded proof. Zero-knowledge follows from the simulators for the per-item relation and the folding transform.
+
+## qFold-EC (Elliptic Curve Path)
+The qfold-ec instantiation uses Pedersen-style commitments over a prime-order elliptic curve group $\mathbb{G}$. For a scalar encoding $m$ with randomness $r$, the commitment is $C(m;r) = rG + mH$. For vector data, it uses multi-Pedersen commitments of the form $C(\mathbf{m}; \mathbf{r}) = \sum_j (r_j G_j + m_j H_j)$. Generator independence is obtained through methods like hash-to-curve or a verifiable base derivation.
+
+### Folding and Proofs
+The folding process uses multi-scalar multiplication (MSM) to compute the final folded commitment $C^\star$ efficiently in a single operation. The prover also generates a proof $\pi$, which is a folded sigma or inner-product argument, similar in style to Bulletproofs. This proof demonstrates that $C^\star$ opens to a hidden vector that satisfies a set of linear constraints. These constraints capture the specific policy $\mathcal{P}$.
+
+Example policies that can be enforced include:
+- Device enrollment attested by a registered key.
+- Key rotation with monotone versioning.
+- Session establishment under 
+multi-factor authentication (MFA).
+- Selective disclosure of true or false claim predicates without revealing underlying values.
+
+Optional range or bit-decomposition constraints can also be enforced on hidden values. Verification is fast on commodity hardware, requiring only a handful of MSM operations and checks.
+
+### Security and Integration
+The security of the scheme reduces to the discrete logarithm assumption on the chosen curve and the knowledge soundness of the inner-product argument. Important engineering practices include using constant-time scalar arithmetic and deterministic nonce derivation for any adjacent cryptographic steps. The choice of curve, such as Ristretto/Ed25519 or **P-256**/secp256r1, depends on the specific deployment requirements.
+
+For a potential integration, qFold-EC could be used as a plug-in verifier in an authentication MVP. A server-side engine would verify folded proofs accompanying register or login requests. An in-memory store would keep only the latest folded object and per-user policy state.
