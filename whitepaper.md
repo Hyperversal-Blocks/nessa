@@ -97,58 +97,53 @@ policy hash, epoch, and purpose. A collision-resistant hash function $H$ is used
 The `tags` structure is public and transmitted in the folded object’s header so that verifiers can reconstruct $(R_0)$ and check transcript binding.
 
 The initial state of the accumulator is defined as:
-$$
-R_0 = H(\text{"NESSA/v1"} \parallel \text{tags})
-$$
+
+$$R\\_0 = H(\text{"NESSA/v1"} \parallel \text{tags})$$
+
 For each subsequent event commitment $C_i$ in the sequence from $i=1$ to $N$, the accumulator is updated iteratively.
-$$
-R_i = H(R_{i-1} \parallel C_i \parallel i)
-$$
-The final accumulator value, or **transcript root**, is $R := R_N$. This single hash value serves as a succinct commitment to the entire ordered sequence of events.
+
+$$R\\_i = H(R\\_{i-1} \parallel C\\_i \parallel i)$$
+
+The final accumulator value, or transcript root, is $R := R\\_N$. This single hash value serves as a succinct commitment to the entire ordered sequence of events.
 
 From this transcript root $R$, the public challenges $\alpha_i$ required for the folding process are derived deterministically.
-$$
-\alpha_i = H_{\text{to\_scalar}}(\text{"NESSA/v1/alpha"} \parallel R \parallel i)
-$$
-Here, $H_{\text{to\_scalar}}$ is a hash function that outputs a scalar value suitable for operations within the chosen cryptographic group.
 
+$$\alpha\\_i = H\\_{\text{to\\_scalar}}(\text{"NESSA/v1/alpha"} \parallel R \parallel i)$$
+
+Here, $H\\_{\text{to\\_scalar}}$ is a hash function that outputs a scalar value suitable for operations within the chosen cryptographic group.
 
 ### The Folded Commitment
+The individual event commitments $\{C\\_i\}\\_{i=1}^N$ are aggregated into a single folded commitment $C^{\star}$. This is achieved by computing a random linear combination using the challenges $\alpha_i$.
 
-The individual event commitments $\{C_i\}_{i=1}^N$ are aggregated into a single folded commitment $C^{\star}$. This is achieved by computing a random linear combination using the challenges $\alpha_i$.
-$$
-C^{\star} \gets \bigoplus_{i=1}^{N} \alpha_i \odot C(m_i; r_i)
-$$
-The symbol $(\odot)$ denotes the scheme’s public linear-combination operator (scalar multiplication in EC; addition plus explicit re-randomization in PQ). Due to the homomorphic properties of the commitment scheme, there exists an aggregate randomness $r^{\star}$ such that the folded commitment correctly opens to the folded message.
-$$
-C^{\star} = C\left(\sum_i \alpha_i m_i; r^{\star}\right)
-$$
+$$C^{\star} \gets \bigoplus\\_{i=1}^{N} \alpha\\_i \odot C(m\\_i; r\\_i)$$
+
+The symbol $\odot$ denotes the scheme’s public linear-combination operator (scalar multiplication in EC; addition plus explicit re-randomization in PQ). Due to the homomorphic properties of the commitment scheme, there exists an aggregate randomness $r^{\star}$ such that the folded commitment correctly opens to the folded message.
+
+$$C^{\star} = C\left(\sum\\_{i} \alpha\\_i m\\_i; r^{\star}\right)$$
 
 ### Proof of Correctness
 
-The prover outputs a tuple $(R, C^{\star}, \pi)$, where $\pi$ is a succinct, non-interactive zero-knowledge proof. This proof $\pi$ demonstrates the existence of a set of witnesses $\{(m_i, r_i, C_i)\}_{i=1}^N$ that are committed to by the transcript root $R$ and satisfy two critical properties.
+The prover outputs a tuple $(R, C^{\star}, \pi)$, where $\pi$ is a succinct, non-interactive zero-knowledge proof. This proof $\pi$ demonstrates the existence of a set of witnesses ${(m\\\_i, r\\\_i, C\\\_i)}\\\_{i=1}^N$ that are committed to by the transcript root $R$ and satisfy two critical properties.
 
-1.  The folded commitment $C^{\star}$ is the correctly computed linear combination of the individual commitments $C_i$, where the challenges $\alpha_i$ are derived from the transcript root $R$ as defined above.
-2.  Each individual message encoding $m_i$ is well-formed and valid according to the language of the policy, denoted as $m_i \in L_{\mathcal{P}}$.
+1.  The folded commitment $C^{\star}$ is the correctly computed linear combination of the individual commitments $C\\_i$, where the challenges $\alpha\\_i$ are derived from the transcript root $R$ as defined above.
+2.  Each individual message encoding $m_i$ is well-formed and valid according to the language of the policy, denoted as $m\\_i in L\\_{\mathcal{P}}$.
 
-This statement is proven using a folded $\Sigma$-protocol. This technique authenticates each commitment $C_i$ against the transcript root $R$ without revealing the underlying messages $m_i$ or the total number of events $N$. A verifier receives `tags`, recomputes $R_0 = H(\text{"NESSA/v1"} \parallel \text{tags})$, verifies that the provided $R$ is consistent with these `tags` via the proof $\pi$, and derives all challenges as $\alpha_i = H_{\text{to\_scalar}}(\text{"NESSA/v1/alpha"} \parallel R \parallel i)$. The verification equation is expressed as:
-$$
-(R, C^{\star}, \pi, \mathsf{pk}, \mathcal{P}, \text{tags}) \rightarrow \{\text{accept, reject}\}
-$$
+This statement is proven using a folded $\Sigma$-protocol. This technique authenticates each commitment $C\\_i$ against the transcript root $R$ without revealing the underlying messages $m\\_i$ or the total number of events $N$. A verifier receives `tags`, recomputes $R\\_0 = H(\text{"NESSA/v1"} \parallel \text{tags})$, verifies that the provided $R$ is consistent with these `tags` via the proof $\pi$, and derives all challenges as $alpha\\\_i = H\\\_{\text{to\\_scalar}}(\text{"NESSA/v1/alpha"} \parallel R \parallel i)$. The verification equation is expressed as:
+$$(R, C^{\star}, \pi, \mathsf{pk}, \mathcal{P}, \text{tags}) \rightarrow \{\text{accept, reject}\}$$
 
 Soundness reduces to the binding property of the commitment scheme $C$ and the knowledge soundness of the folded proof. Zero-knowledge follows from the simulators for the per-item relation and the folding transform.
 
 ## qFold-EC (Elliptic Curve Path)
-The `qfold-ec` instantiation uses **Pedersen-style commitments** over a prime-order elliptic curve group $\mathbb{G}$. For a scalar encoding $m$ with randomness $r$, a commitment is formed as $C(m; r) = rG + mH$. This extends naturally to vector data using multi-Pedersen commitments, where $C(\mathbf{m}; \mathbf{r}) = \sum_{j} (r_j G_j + m_j H_j)$.
+The `qfold-ec` instantiation uses **Pedersen-style commitments** over a prime-order elliptic curve group $\mathbb{G}$. For a scalar encoding $m$ with randomness $r$, a commitment is formed as $C(m; r) = rG + mH$. This extends naturally to vector data using multi-Pedersen commitments, where $C(\mathbf{m}; \mathbf{r}) = \sum\\_{j} (r\\_j G\\_j + m\\_j H\\_j)$.
 
 The generator bases for these commitments are derived using a **"Nothing Up My Sleeve" (a tribute to Satoshi)** 
 construction to 
 ensure their integrity and independence. Specifically, the base points are generated via a hash-to-curve function with fixed domain separation tags.
 $$
-G_j = \mathrm{H2C}(\text{"NESSA/v1/base/G"} \parallel \text{curve\_id} \parallel j)
+G\\_j = \mathrm{H2C}(\text{"NESSA/v1/base/G"} \parallel \text{curve\\_id} \parallel j)
 $$
 $$
-H_j = \mathrm{H2C}(\text{"NESSA/v1/base/H"} \parallel \text{curve\_id} \parallel j)
+H\\_j = \mathrm{H2C}(\text{"NESSA/v1/base/H"} \parallel \text{curve\\_id} \parallel j)
 $$
 This verifiable and deterministic process guarantees that no party knows the discrete logarithm relationships between any of the base points. Consequently, under the standard **Discrete Logarithm (DLOG)** assumption in the group $\mathbb{G}$ and the resulting independence of the bases, these commitments are computationally **binding** and **hiding**.
 The domain separation strings include `version` and `curve_id`, and the H2C suite identifier is recorded in the public header to make base derivation auditable and unambiguous.
@@ -188,7 +183,7 @@ qfold‑pq is out of scope for the objectives outlined for **GG24 Privacy Round*
 - Adversaries: Active network attackers, malicious verifiers, and device compromise with recovery.
 - Unforgeability: From commitment binding + proof soundness.
 - Zero‑knowledge: Verifier learns only policy results. The proof and header do not reveal the underlying values or the exact count/order/timing of events. If padding is disabled, a logarithmic‑size subcomponent may leak an upper bound on the count; deployments can enable fixed‑size padding to remove this leakage.
-- **Non-malleability (ROM)**: The proof binds to $(\text{policy_hash}, \text{tags}, R, \text{version})$ via 
+- **Non-malleability (ROM)**: The proof binds to $(\text{policy\\_hash}, \text{tags}, R, \text{version})$ via 
   Fiat-Shamir, where $R$ is the transcript accumulator root. Splicing or mix-and-match attacks across different contexts will fail unless the hash function collides. This property holds in the Random Oracle Model, given the commitment scheme's binding property and the knowledge soundness of the folded argument.
 - Forward security: Fresh randomness and epoch tags invalidate old openings; prior states can’t be replayed.
 - Side‑channels: Constant‑time scalar arithmetic (EC). Avoid 
@@ -260,32 +255,20 @@ An in-memory data store is provided by `pkg/store/mem.go`, which manages maps fo
 
 ## Appendix A: An Intuitive Example
 
-To build intuition for the folding mechanism, consider a simplified numerical example. Let two distinct events be encoded as small scalar messages. The first event, "device enrolled," is represented by $m_1=3$. The second event, "key rotated to v2," is represented by $m_2=5$. The prover generates commitments to these events as $C_1=C(3;r_1)$ and $C_2=C(5;r_2)$, where $r_1$ and $r_2$ are random values.
+To build intuition for the folding mechanism, consider a simplified numerical example. Let two distinct events be encoded as small scalar messages. The first event, "device enrolled," is represented by $m\\_1=3$. The second event, "key rotated to v2," is represented by $m\\_2=5$. The prover generates commitments to these events as $C\\_1=C(3;r\\_1)$ and $C\\_2=C(5;r_2)$, where $r\\_1$ and $r\\_2$ are random values.
 
-The system's transcript absorbs labels and these commitments in sequence. A verifiably random challenge is then derived for each step using the Fiat-Shamir heuristic over the transcript's state. For this example, assume these challenges are $\alpha_1=7$ and $\alpha_2=11$.
+The system's transcript absorbs labels and these commitments in sequence. A verifiably random challenge is then derived for each step using the Fiat-Shamir heuristic over the transcript's state. For this example, assume these challenges are $\alpha\\_1=7$ and $\alpha\\_2=11$.
 
-The folded commitment $C^{\star}$ is the random linear combination of the individual commitments, defined as $C^{\star} = \alpha_1 C_1 \oplus \alpha_2 C_2$. The calculation proceeds by applying the homomorphic properties of the commitment scheme.
+The folded commitment $C^{\star}$ is the random linear combination of the individual commitments, defined as $C^{\star} = \alpha\\_1 C\\_1 \oplus \alpha\\_2 C\\_2$. The calculation proceeds by applying the homomorphic properties of the commitment scheme.
 
 First, the **scaling property**, $\alpha \cdot C(m; r) = C(\alpha m; \alpha r)$, is applied to each term.
-$$
-7 C_1 = 7 \cdot C(3; r_1) = C(7 \cdot 3; 7r_1) = C(21; 7r_1)
-$$
-$$
-11 C_2 = 11 \cdot C(5; r_2) = C(11 \cdot 5; 11r_2) = C(55; 11r_2)
-$$
+$$7 C_1 = 7 \cdot C(3; r_1) = C(7 \cdot 3; 7r_1) = C(21; 7r_1)$$
+$$11 C_2 = 11 \cdot C(5; r_2) = C(11 \cdot 5; 11r_2) = C(55; 11r_2)$$
 Next, these scaled commitments are combined using the **additivity property**, $C(m_1; r_1) \oplus C(m_2; r_2) = C(m_1 + m_2; r_1 + r_2)$.
-$$
-C^{\star} = C(21; 7r_1) \oplus C(55; 11r_2) = C(21 + 55; 7r_1 + 11r_2)
-$$
+$$C^{\star} = C(21; 7r_1) \oplus C(55; 11r_2) = C(21 + 55; 7r_1 + 11r_2)$$
 This results in the final folded commitment.
-$$
-C^{\star} = C(76; r_{\star})
-$$
-Here, $r_{\star} = 7r_1 + 11r_2$ is the new aggregate randomness. The prover then generates a succinct proof $\pi$. 
-This proof demonstrates that the hidden value inside $C^{\star}$, which is 76, is a valid linear combination of 
-admissible event encodings. The proof achieves this without revealing the original events, their values, or their 
-count. The verifier checks the public header (including `tags` and \(R\)) and the tuple $((R, C^{\star}, \pi))$ 
-against the policy $(\mathcal{P}$).
+$$C^{\star} = C(76; r_{\star})$$
+Here, $r_{\star} = 7r_1 + 11r_2$ is the new aggregate randomness. The prover then generates a succinct proof $\pi$. This proof demonstrates that the hidden value inside $C^{\star}$, which is 76, is a valid linear combination of admissible event encodings. The proof achieves this without revealing the original events, their values, or their count. The verifier checks the public header (including `tags` and $R$) and the tuple $(R, C^{\star}, \pi)$ against the policy $\mathcal{P}$.
 
 ### Appendix B: Security Properties
 
