@@ -1,5 +1,15 @@
 # NESSA
 
+## Documents
+
+- `whitepaper.md` is the app-repo copy of the authoritative qFold-EC whitepaper
+  maintained in the private Research authority directory.
+- `whitepaper-230326-audit.md` is the companion audit-backed update report.
+- `benchmarks/qfold-ec/2026-05-07/` is the app-repo copy of the qFold-EC
+  benchmark and generated verification bundle.
+- `archive/whitepaper-previous-2026-05-07.md` preserves the previous app-level
+  whitepaper that this copy replaced.
+
 ## Our Definition
 NESSA is a privacy-first, local-first protocol layer designed for identity, access, and credential management. It enables a user or device to compress numerous sensitive security events, such as enrollments, key rotations, and policy checks, into a single verifiable object. A verifier can inspect this object to confirm policy compliance without accessing the underlying event data or leaking metadata. This capability is powered by **qFold**, a folding transform that aggregates event commitments and generates a succinct proof of correctness. NESSA maintains a consistent application experience across two cryptographic backends. **qFold-EC** is an elliptic-curve track available for immediate deployment, while **qFold-PQ** provides a post-quantum migration path. This dual-engine design ensures that the user experience, APIs, and privacy semantics remain stable even as the underlying cryptography evolves.
 

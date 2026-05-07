@@ -1,0 +1,78 @@
+ASC Ad Metadata Demo Report
+===========================
+version=nessa-asc-ad-demo-v1
+deterministic=True
+benchmark_enabled=True
+
+Focused Correctness
+-------------------
+checks=100 accepted=94 rejected=6
+expected_denials=6 unexpected_rejections=0
+cross_campaign_rejection=PASS reasons=['campaign_id_mismatch', 'weight_profile_mismatch', 'request_context_mismatch', 'campaign_policy_mismatch']
+segment_summary={"broad": {"accepted": 25, "rejected": 0}, "local": {"accepted": 25, "rejected": 0}, "premium": {"accepted": 25, "rejected": 0}, "restricted": {"accepted": 19, "rejected": 6}}
+campaign_summary={"campaign://behavioral-retarget": {"accepted": 20, "rejected": 0}, "campaign://broad-reach": {"accepted": 20, "rejected": 0}, "campaign://consent-gated": {"accepted": 16, "rejected": 4}, "campaign://local-business": {"accepted": 20, "rejected": 0}, "campaign://luxury-targeting": {"accepted": 18, "rejected": 2}}
+redaction_audit=redacted prover_identity, redacted raw_profile, redacted user_secret_digest, redacted user_summary.integrator_metadata.raw_profile, redacted user_summary.integrator_metadata.prover_identity
+known_answer_vector={"C_star": "c059a294f486f3174fceb084717001d6c9cad305b5590ef253668eddc1bc7161", "campaign_id": "campaign://luxury-targeting", "final_root": "50a6d5d23f2a8a14f85687893e5bc51ef29aae773f4b228102d50c36e631d63bd593bbd3313aa340b57294ce0b4ddfb84fe04dc4e2ea843e4a0deefc8de0962d", "nullifier": "cd8599462c9db138f15136021e9cf062730afde48fead4a3e00fa097179edf84", "pi_cons_challenge": "e61cc994944f9f22c46d6a840d645d7f67f37d4b7ca7d2cb41df2f78976f5005", "pi_link_challenge": "c7d04caff1d83852e28ce73d6475cb4ae308d502a9ac565c98492f0494f41f0d", "pseudonym": "096f4d1382ca80457176add235c08eaee32d1aabf6618cd6247eb1e28fcd11e5", "tags_hash": "ef1c66dcf144c1df4420b677fb9cf53d8c9dfd7730b898b6cfaaa1110e05f741dd9921a1b46c53ed33598582666166320cf4c180ab551da443dba5072d4c82af"}
+
+User x Campaign correctness matrix (OK/NO):
+  user | behavioral-retarget | broad-reach | consent-gated | local-business | luxury-targeting
+  broad-0 | OK | OK | OK | OK | OK
+  broad-1 | OK | OK | OK | OK | OK
+  broad-2 | OK | OK | OK | OK | OK
+  broad-3 | OK | OK | OK | OK | OK
+  broad-4 | OK | OK | OK | OK | OK
+  local-0 | OK | OK | OK | OK | OK
+  local-1 | OK | OK | OK | OK | OK
+  local-2 | OK | OK | OK | OK | OK
+  local-3 | OK | OK | OK | OK | OK
+  local-4 | OK | OK | OK | OK | OK
+  premium-0 | OK | OK | OK | OK | OK
+  premium-1 | OK | OK | OK | OK | OK
+  premium-2 | OK | OK | OK | OK | OK
+  premium-3 | OK | OK | OK | OK | OK
+  premium-4 | OK | OK | OK | OK | OK
+  restricted-0 | OK | OK | NO | OK | NO
+  restricted-1 | OK | OK | NO | OK | OK
+  restricted-2 | OK | OK | NO | OK | OK
+  restricted-3 | OK | OK | OK | OK | OK
+  restricted-4 | OK | OK | NO | OK | NO
+
+Scaling Benchmark
+-----------------
+validity_counts={"batch_fail": 0, "batch_pass": 13, "single_fail": 0, "single_pass": 13}
+  N | proof_size | prove | verify | batch_size | batch_elapsed | batch_thr/s | single_ok | batch_ok
+     1 |       1632 |  11.05ms |   4.40ms |          4 |      17.99ms |      222.29 |      True |     True
+     2 |       1632 |  12.24ms |   4.51ms |          4 |      18.09ms |      221.17 |      True |     True
+     4 |       1632 |  15.08ms |   4.79ms |          4 |      19.07ms |      209.74 |      True |     True
+     8 |       1632 |  21.19ms |   4.95ms |          4 |      20.45ms |      195.59 |      True |     True
+    16 |       1632 |  32.01ms |   5.82ms |          4 |      22.51ms |      177.69 |      True |     True
+    32 |       1632 |  54.52ms |   7.12ms |          4 |      27.26ms |      146.73 |      True |     True
+    64 |       1632 | 101.62ms |   9.77ms |          4 |      38.53ms |      103.80 |      True |     True
+   128 |       1632 | 189.74ms |  14.37ms |          4 |      58.06ms |       68.89 |      True |     True
+   256 |       1632 | 373.63ms |  24.49ms |          2 |      48.69ms |       41.08 |      True |     True
+   512 |       1632 | 733.85ms |  44.84ms |          2 |      96.25ms |       20.78 |      True |     True
+  1024 |       1632 |   1.481s |  83.60ms |          2 |     182.04ms |       10.99 |      True |     True
+  2048 |       1632 |   2.957s | 163.41ms |          1 |     163.21ms |        6.13 |      True |     True
+  4096 |       1632 |   5.985s | 326.70ms |          1 |     328.99ms |        3.04 |      True |     True
+validity_matrix=
+  N=   1 single_ok=True batch_ok=True single_proof_valid=True single_eligibility_valid=True
+  N=   2 single_ok=True batch_ok=True single_proof_valid=True single_eligibility_valid=True
+  N=   4 single_ok=True batch_ok=True single_proof_valid=True single_eligibility_valid=True
+  N=   8 single_ok=True batch_ok=True single_proof_valid=True single_eligibility_valid=True
+  N=  16 single_ok=True batch_ok=True single_proof_valid=True single_eligibility_valid=True
+  N=  32 single_ok=True batch_ok=True single_proof_valid=True single_eligibility_valid=True
+  N=  64 single_ok=True batch_ok=True single_proof_valid=True single_eligibility_valid=True
+  N= 128 single_ok=True batch_ok=True single_proof_valid=True single_eligibility_valid=True
+  N= 256 single_ok=True batch_ok=True single_proof_valid=True single_eligibility_valid=True
+  N= 512 single_ok=True batch_ok=True single_proof_valid=True single_eligibility_valid=True
+  N=1024 single_ok=True batch_ok=True single_proof_valid=True single_eligibility_valid=True
+  N=2048 single_ok=True batch_ok=True single_proof_valid=True single_eligibility_valid=True
+  N=4096 single_ok=True batch_ok=True single_proof_valid=True single_eligibility_valid=True
+observations={"all_batch_passed": true, "all_single_verify_passed": true, "constant_proof_size": true, "proof_sizes": [1632]}
+
+Notes
+-----
+- This demo proves metadata binding and transcript integrity, not full ad-policy predicates or issuer-backed truth of self-asserted metadata.
+- Nullifier checks are application-layer Sybil controls scoped to (user, verifier, campaign window).
+- Default pseudonym scope is per-verifier (supports capping/analytics but allows intra-verifier campaign linkability).
+- Use per-campaign-window pseudonyms for stronger unlinkability at the cost of weaker longitudinal analytics.

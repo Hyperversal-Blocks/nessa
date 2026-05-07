@@ -1,0 +1,90 @@
+{
+  "asc_summary": {
+    "artifact_filenames": {
+      "artifact_manifest": "asc_ad_artifact_manifest.json",
+      "asc_ad_report": "asc_ad_report.json",
+      "benchmark_rows": "asc_ad_benchmark_rows.json",
+      "benchmark_validity": "asc_ad_benchmark_validity.json",
+      "business_summary": "asc_ad_business_summary.json",
+      "campaigns": "asc_ad_campaigns.json",
+      "dataset_users": "asc_ad_dataset_users.json",
+      "focused_matrix": "asc_ad_focused_matrix.json",
+      "focused_proofs": "asc_ad_focused_proofs.json",
+      "focused_verifications": "asc_ad_focused_verifications.json",
+      "generated_content": "asc_ad_generated_content.json",
+      "privacy_audit": "asc_ad_privacy_audit.json",
+      "reach_summary": "asc_ad_reach_summary.json",
+      "test_metadata": "asc_ad_test_metadata.json"
+    },
+    "benchmark_enabled": true,
+    "deterministic": true,
+    "files_generated": [
+      "asc_ad_artifact_manifest.json",
+      "asc_ad_dataset_users.json",
+      "asc_ad_campaigns.json",
+      "asc_ad_focused_proofs.json",
+      "asc_ad_focused_verifications.json",
+      "asc_ad_focused_matrix.json",
+      "asc_ad_generated_content.json",
+      "asc_ad_test_metadata.json",
+      "asc_ad_privacy_audit.json",
+      "asc_ad_business_summary.json",
+      "asc_ad_reach_summary.json",
+      "asc_ad_benchmark_rows.json",
+      "asc_ad_benchmark_validity.json",
+      "asc_ad_report.json"
+    ],
+    "record_counts": {
+      "benchmark_rows": 13,
+      "benchmark_validity": 13,
+      "campaigns": 5,
+      "dataset_users": 20,
+      "focused_matrix": 100,
+      "focused_proofs": 100,
+      "focused_verifications": 100,
+      "generated_content": 100
+    },
+    "schema_version": "nessa_asc_root_artifacts_v1",
+    "totals": {
+      "accepted": 94,
+      "expected_denials": 6,
+      "rejected": 6,
+      "total_checks": 100,
+      "unexpected_rejections": 0
+    },
+    "version": "nessa-asc-ad-demo-v1"
+  },
+  "benchmark_enabled": true,
+  "bundle": "nessa_docs_bundle_v1",
+  "counts": {
+    "actor_cache_actors": 5,
+    "usecase_flow_summaries": 7,
+    "usecase_material_schema_sections": 7
+  },
+  "deterministic": true,
+  "docs_root": "docs",
+  "generated_root": "docs/generated",
+  "outputs": {
+    "asc_ad_demo": {
+      "audit_dir": "docs/generated/asc_ad_demo/audit",
+      "audit_manifest": "docs/generated/asc_ad_demo/audit/asc_ad_artifact_manifest.json",
+      "report_json": "docs/generated/asc_ad_demo/reports/asc_ad_benchmark_report.json",
+      "report_text": "docs/generated/asc_ad_demo/reports/asc_ad_benchmark_report.txt",
+      "reports_dir": "docs/generated/asc_ad_demo/reports"
+    },
+    "bundle": {
+      "manifest": "docs/generated/docs_bundle_manifest.json",
+      "readme": "docs/README.md"
+    },
+    "protocol": {
+      "test_vectors": "docs/generated/protocol/test_vectors/test_vectors_output.json",
+      "verification_json": "docs/generated/protocol/verification/verification_report.json",
+      "verification_text": "docs/generated/protocol/verification/verification_report.txt"
+    },
+    "usecase_flows": {
+      "actor_cache": "docs/generated/usecase_flows/actor_cache/nessa_usecase_actors.json",
+      "flow_summaries": "docs/generated/usecase_flows/metadata/flow_summaries.json",
+      "material_schema": "docs/generated/usecase_flows/metadata/material_schema.json"
+    }
+  }
+}
