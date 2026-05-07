@@ -8,9 +8,9 @@ Material changes:
 
 - Transcript accumulation and challenge derivation are now fully verifier-recomputable and byte-exact. Every transcript input is deterministically encoded CBOR under an explicitly frozen restricted profile, with strict reject rules to prevent parser differentials. RFC 8949 requires deterministic encoding choices to be explicit and distinguishes core deterministic map ordering from legacy “length-first” ordering. [1]
 - The ciphersuite is frozen to ristretto255 with SHA-512, with point decoding/encoding and scalar guidance pinned to RFC 9496, and hash-to-group / hash-to-field pinned to RFC 9380. [2], [3], [4]
-- H2S is defined using RFC 9380 hash_to_field with expand_message_xmd(SHA-512) and explicit L = 48 bytes at 128-bit target security (per RFC 9380’s bias-control formula), with a published DST registry. [2]
+- H2S is defined using RFC 9380 `hash_to_field` with `expand_message_xmd(SHA-512)` and explicit $L = 48$ bytes at 128-bit target security (per RFC 9380’s bias-control formula), with a published DST registry. [2]
 - Commitment Profile V2 (two-family, vector blinding) is made dimensionally consistent everywhere. All “scalar $r_\star$” language is removed; folded openings are vectors.
-- The proof object is fully specified as $\pi := (\pi_{\mathrm{link}}, \pi_{\mathrm{cons}})$. $\pi_{\mathrm{link}}$ is a multi-relation Schnorr NIZK binding the folded commitment $C_\star$ to explicit policy commitments $V_j$. $\pi_{\mathrm{cons}}$ proves folded linear constraints $A \cdot m_\star = s \cdot b$ using $\beta$ compression and a Schnorr discrete-log proof on a derived group element $W$. Schnorr NIZK framing and context binding follow RFC 8235 guidance, and deterministic CBOR provides unambiguous boundaries without ad hoc length-prefixing. [1], [5]
+- The proof object is fully specified as $\pi := (\pi_{\mathrm{link}}, \pi_{\mathrm{cons}})$. $\pi_{\mathrm{link}}$ is a multi-relation Schnorr NIZK binding the folded commitment $C_\star$ to explicit policy commitments $V_j$. $\pi_{\mathrm{cons}}$ proves folded linear constraints $A \cdot \vec{m}_\star = s \cdot b$ using $\beta$ compression and a Schnorr discrete-log proof on a derived group element $W$. Schnorr NIZK framing and context binding follow RFC 8235 guidance, and deterministic CBOR provides unambiguous boundaries without ad hoc length-prefixing. [1], [5]
 - The wire format is defined in CBOR with strict reject behavior (including canonical ristretto decoding and scalar canonicality expectations), and a clear “embedded commitment list” model for v1 to guarantee verifier recomputation.
 
 Open or explicitly unspecified items:
@@ -21,7 +21,7 @@ Open or explicitly unspecified items:
 
 Implementation status:
 
-- The ECC v1 profile is implementable: deterministic encoding, transcript schedule, base derivation, commitment arithmetic, proof statements, and verifier obligations are specified and cross-checked against primary standards. The included N=8 computed test vectors (linear end-to-end plus a non-linear folding example) validate dimensional correctness and transcript determinism.
+- The ECC v1 profile is implementable: deterministic encoding, transcript schedule, base derivation, commitment arithmetic, proof statements, and verifier obligations are specified and cross-checked against primary standards. The included $N = 8$ computed test vectors (linear end-to-end plus a non-linear folding example) validate dimensional correctness and transcript determinism.
 
 ## Audit Disposition Ledger
 
@@ -78,7 +78,7 @@ Audit source(s): first-pass D-002.
 Disposition: APPLY WITH MODIFICATION.
 Explanation: v1 requires the full ordered list $C_1,\ldots,C_N$ be embedded on wire. Any “hidden $\{C_i\}$” mode requires a different proof relation (prove the hash-chain relation inside $\pi$ or redesign the accumulator). This is left as an open item rather than a half-spec.
 Authority basis: Fiat–Shamir requires verifier-recomputable transcripts; RFC 8235 emphasizes explicit context binding and clear boundaries for hashed items. [5]
-Resulting whitepaper change: Normatively fixed “v1 commitment list semantics: embedded list” and moved hidden-{C_i} to Open Items.
+Resulting whitepaper change: Normatively fixed “v1 commitment list semantics: embedded list” and moved hidden-$\{C_i\}$ to Open Items.
 
 #### D-003 — Challenge derivation requires a public index domain
 
@@ -94,7 +94,7 @@ Resulting whitepaper change: Rewrote privacy and leakage model; added optional p
 Affected sections: DST registry; suite binding; transcript labels.
 Audit source(s): first-pass D-004.
 Disposition: APPLY WITH MODIFICATION.
-Explanation: The revised spec publishes both (a) protocol transcript labels and (b) RFC 9380 DSTs for hash_to_field and hash_to_ristretto255, with explicit registry entries and suite binding. RFC 9380 specifies DST construction and REQUIRED identifier guidance for ristretto255 + XMD:SHA-512. [2]
+Explanation: The revised spec publishes both (a) protocol transcript labels and (b) RFC 9380 DSTs for `hash_to_field` and `hash_to_ristretto255`, with explicit registry entries and suite binding. RFC 9380 specifies DST construction and REQUIRED identifier guidance for ristretto255 + XMD:SHA-512. [2]
 Resulting whitepaper change: Added a normatively frozen DST registry and required binding of the REQUIRED identifier into tags.
 
 #### D-005 — Commitment model mismatch and dimensional inconsistency
@@ -111,7 +111,7 @@ Resulting whitepaper change: Removed scalar-only commitment definitions from nor
 Affected sections: base derivation; suite identifiers; curve identifiers.
 Audit source(s): first-pass D-006.
 Disposition: APPLY AS WRITTEN.
-Explanation: All bases are derived via RFC 9380 hash_to_ristretto255 (expand_message_xmd(SHA-512), 64 bytes) mapped via ristretto255_map, where the map is the ristretto element-derivation function described in RFC 9496. Deterministic retry rules handle identity/duplicates. [2], [3]
+Explanation: All bases are derived via RFC 9380 `hash_to_ristretto255` (`expand_message_xmd(SHA-512)`, 64 bytes) mapped via `ristretto255_map`, where the map is the ristretto element-derivation function described in RFC 9496. Deterministic retry rules handle identity/duplicates. [2], [3]
 Resulting whitepaper change: Added a base-derivation algorithm with explicit messages, DSTs, identity/duplicate checks, and retry counter.
 
 #### D-007 — Point decoding/validation and canonicality are missing
@@ -122,12 +122,12 @@ Disposition: APPLY AS WRITTEN.
 Explanation: The revised spec mandates RFC 9496 decoding for ristretto elements, including the rule that non-canonical values are rejected and the most significant bit is not masked during decode. [3]
 Resulting whitepaper change: Added canonical decode requirements, re-encode checks, and reject rules.
 
-#### D-008 — H_to_scalar is informal
+#### D-008 — H-to-scalar is informal
 
 Affected sections: H2S definition; $\alpha_i$ schedule; $\beta$ sampling.
 Audit source(s): first-pass D-008.
 Disposition: APPLY AS WRITTEN.
-Explanation: H2S uses RFC 9380 hash_to_field over GF(r) with expand_message_xmd(SHA-512). L is fixed by RFC formula, and for a 255-bit prime at k=128, L=48. [2]
+Explanation: H2S uses RFC 9380 `hash_to_field` over $\mathrm{GF}(r)$ with `expand_message_xmd(SHA-512)`. L is fixed by the RFC formula, and for a 255-bit prime at $k = 128$, $L = 48$. [2]
 Resulting whitepaper change: Added normative H2S algorithm, parameters, and DST registry.
 
 #### D-009 — $\pi$ is unspecified / relies on infeasible verification language
@@ -159,7 +159,7 @@ Resulting whitepaper change: Added wire schema tables, strict reject rules, and 
 Affected sections: performance section; proof sizing.
 Audit source(s): first-pass D-012 (sparse in artifact).
 Disposition: APPLY AS WRITTEN.
-Explanation: Any numeric performance claims are removed unless tied to explicit parameters (N,d,k) and measured benchmarks. Bulletproofs provides general asymptotic guidance for circuit proof size, but concrete numbers depend on circuit size and implementation choices. [6]
+Explanation: Any numeric performance claims are removed unless tied to explicit parameters $(N,d,k)$ and measured benchmarks. Bulletproofs provides general asymptotic guidance for circuit proof size, but concrete numbers depend on circuit size and implementation choices. [6]
 Resulting whitepaper change: Replaced overclaims with parameter dependence and required benchmark/test-vector methodology.
 
 #### D-013 — Refresh/rebase/compaction semantics missing
@@ -183,15 +183,15 @@ Resulting whitepaper change: Harmonized all commitment arithmetic to V2.
 Affected sections: transcript labels; DSTs; suite identifiers.
 Audit source(s): second-pass SP-002.
 Disposition: APPLY AS WRITTEN.
-Explanation: The revised spec defines NESSA transcript labels for CBOR-framed transcript messages and RFC 9380 DSTs for hash_to_field/hash_to_ristretto255 separately, preventing accidental collisions and clarifying what is used where. [2]
+Explanation: The revised spec defines NESSA transcript labels for CBOR-framed transcript messages and RFC 9380 DSTs for `hash_to_field` and `hash_to_ristretto255` separately, preventing accidental collisions and clarifying what is used where. [2]
 
-#### SP-003 — Bind REQUIRED identifier for hash_to_ristretto255
+#### SP-003 — Bind REQUIRED identifier for hash-to-ristretto255
 
 Affected sections: tags schema; suite binding.
 Audit source(s): second-pass SP-003.
 Disposition: APPLY AS WRITTEN.
 Explanation: Tags MUST include `ristretto255_XMD:SHA-512_R255MAP_RO_` exactly, as specified by RFC 9380 for this instantiation. [2]
-Resulting whitepaper change: Added required tag field suite_id_h2g with that value.
+Resulting whitepaper change: Added required tag field `suite_id_h2g` with that value.
 
 #### SP-004 — P-256 subgroup checks are context-specific
 
@@ -201,19 +201,19 @@ Disposition: APPLY WITH MODIFICATION.
 Explanation: v1 is ristretto-only; P-256 validation rules are referenced only as future extension guidance (SEC 1) and not used in the v1 proof relation.
 Authority basis: RFC 9496 defines ristretto as prime-order; SEC 1 applies to Weierstrass curve point encodings for future extension, with SEC 2 and NIST SP 800-186 retained as future domain-parameter references. [3], [10], [11], [12]
 
-#### SP-005 — Use hash_to_field for H2S
+#### SP-005 — Use hash-to-field for H2S
 
 Affected sections: H2S definition; $\beta$ compression.
 Audit source(s): second-pass SP-005.
 Disposition: APPLY AS WRITTEN.
-Explanation: hash_to_field is used for H2S, with explicit L and k. [2]
+Explanation: `hash_to_field` is used for H2S, with explicit L and k. [2]
 
 #### SP-006 — Bind d, N, and tags into transcript
 
 Affected sections: tags; transcript schedule.
 Audit source(s): second-pass SP-006.
 Disposition: APPLY AS WRITTEN.
-Explanation: d and policy_hash live in tags which are hash-bound into R0; N is determined by the embedded list length and thus transcript-bound. [1], [5]
+Explanation: d and `policy_hash` live in tags which are hash-bound into R0; N is determined by the embedded list length and thus transcript-bound. [1], [5]
 
 #### SP-007 — Hidden N/order claims are blocked unless padding profile exists
 
@@ -241,7 +241,7 @@ Explanation: Not supported in v1; listed as open item requiring either a proof o
 Affected sections: commitment definition.
 Audit source(s): second-pass SP-010.
 Disposition: APPLY AS WRITTEN.
-Explanation: Commitment equation is fixed to $\sum_j(r_j B^r_j + m_j B^m_j)$ with explicit base derivation and vector blinding. [6], [9]
+Explanation: Commitment equation is fixed to $\sum_{j=1}^{d}(r_j B^r_j + m_j B^m_j)$ with explicit base derivation and vector blinding. [6], [9]
 
 ## NESSA qFold-EC Protocol Specification
 
@@ -253,7 +253,7 @@ This v1 specification is implementation-grade for the linear-only policy profile
 
 - Group: ristretto255 with canonical decoding/encoding and scalar guidance per RFC 9496. [3]
 - Hash: SHA-512 per FIPS 180-4. [4]
-- Hash-to-group and hash-to-field: RFC 9380 hash_to_ristretto255 and hash_to_field with expand_message_xmd(SHA-512), including bias-control length L. [2]
+- Hash-to-group and hash-to-field: RFC 9380 `hash_to_ristretto255` and `hash_to_field` with `expand_message_xmd(SHA-512)`, including bias-control length L. [2]
 - Canonical encoding and transcript binding: deterministic CBOR per RFC 8949 with an explicit restricted profile and strict reject rules. [1]
 - Proof: $\pi := (\pi_{\mathrm{link}}, \pi_{\mathrm{cons}})$, with explicit policy commitments $V_j$, multi-relation Schnorr linkage, and compressed linear constraint proof. Schnorr NIZK framing and contextual binding follow RFC 8235. [3], [5]
 
@@ -289,10 +289,10 @@ Declared leakage in v1:
 This specification fixes:
 
 - $H_{\mathrm{tr}} = \mathrm{SHA512}$, denoting SHA-512 from FIPS 180-4. [4]
-- H2G = RFC 9380 hash_to_ristretto255 (expand_message_xmd(SHA-512), output length 64, then ristretto255_map). RFC 9380 defines this construction and states the REQUIRED identifier for this instantiation. [2]
+- H2G is RFC 9380 `hash_to_ristretto255` (`expand_message_xmd(SHA-512)`, output length 64, then `ristretto255_map`). RFC 9380 defines this construction and states the REQUIRED identifier for this instantiation. [2]
 - REQUIRED identifier bound in tags: `ristretto255_XMD:SHA-512_R255MAP_RO_`. [2]
 
-H2S uses RFC 9380 hash_to_field over $\mathrm{GF}(r)$:
+H2S uses RFC 9380 `hash_to_field` over $\mathrm{GF}(r)$:
 
 - Bias control: RFC 9380 defines $L = \lceil(\lceil\log_2(p)\rceil + k)/8\rceil$ and gives $L = 48$ bytes for a 255-bit prime at $k = 128$. For ristretto scalars, set $k = 128$ and $L = 48$. [2]
 
@@ -328,16 +328,16 @@ Tags τ is a deterministic CBOR map with unsigned integer keys.
 
 | Key | Name | Type | Requirement |
 | ---: | --- | --- | --- |
-| 0 | protocol_version | uint | MUST be 1 |
-| 1 | protocol_suite_id | tstr | MUST be `NESSA-EC-RISTRETTO255-SHA512-v1` |
-| 2 | h2g_required_id | tstr | MUST be `ristretto255_XMD:SHA-512_R255MAP_RO_` [2] |
-| 3 | encoding_id | tstr or uint | application-defined |
-| 4 | encoding_hash | bstr(64) | SHA-512 of canonical encoding schema |
+| 0 | `protocol_version` | uint | MUST be 1 |
+| 1 | `protocol_suite_id` | tstr | MUST be `NESSA-EC-RISTRETTO255-SHA512-v1` |
+| 2 | `h2g_required_id` | tstr | MUST be `ristretto255_XMD:SHA-512_R255MAP_RO_` [2] |
+| 3 | `encoding_id` | tstr or uint | application-defined |
+| 4 | `encoding_hash` | bstr(64) | SHA-512 of canonical encoding schema |
 | 5 | d | uint | message dimension |
-| 6 | policy_id | tstr or uint | application-defined |
-| 7 | policy_hash | bstr(64) | SHA-512 of compiled policy object |
-| 8 | k_rows | uint | number of linear constraints |
-| 9 | transcript_seed | bstr(64) | OPTIONAL; hash of signature/proof-chain digest |
+| 6 | `policy_id` | tstr or uint | application-defined |
+| 7 | `policy_hash` | bstr(64) | SHA-512 of compiled policy object |
+| 8 | `k_rows` | uint | number of linear constraints |
+| 9 | `transcript_seed` | bstr(64) | OPTIONAL; hash of signature/proof-chain digest |
 
 `tags_hash := SHA-512(EncCBOR(τ))`. In formulas below, `SHA512(...)` denotes SHA-512 applied to bytes. [1], [4]
 
@@ -345,7 +345,7 @@ Implementation note: this repository currently serializes `encoding_id` and `pol
 
 ### Commitment Profile V2
 
-Fix d per encoding_id.
+Fix d per `encoding_id`.
 
 Base families:
 
@@ -358,10 +358,10 @@ Base derivation (normative):
 For each base label and index j, derive a ristretto point via:
 
 $$
-P := \mathrm{hash\\_to\\_ristretto255}(\mathrm{msg}, \mathrm{DST})
+P := \mathrm{hash\_to\_ristretto255}(\mathrm{msg}, \mathrm{DST})
 $$
 
-where hash_to_ristretto255 is RFC 9380 (expand_message_xmd(SHA-512), 64 bytes, then ristretto255_map). [2], [3]
+where `hash_to_ristretto255` is RFC 9380 (`expand_message_xmd(SHA-512)`, 64 bytes, then `ristretto255_map`). [2], [3]
 
 Derivation messages use deterministic CBOR:
 
@@ -374,7 +374,7 @@ DSTs are fixed ASCII strings (see DST registry below).
 
 Deterministic retry:
 
-- If the derived encoding equals the identity encoding (32 zero bytes; see RFC 9496 generator-multiple test vectors including B[0]) or duplicates an already-derived base in the same family, append a u32 counter to msg and retry until valid. [2], [3]
+- If the derived encoding equals the identity encoding (32 zero bytes; see RFC 9496 generator-multiple test vectors including `B[0]`) or duplicates an already-derived base in the same family, append a `u32` counter to `msg` and retry until valid. [2], [3]
 
 Commitment:
 
@@ -385,22 +385,22 @@ $$
 \sum_{j=1}^{d} (r_j B^r_j + m_j B^m_j) \in \mathbb{G}.
 $$
 
-### Event Encoding Enc(e)
+### Event Encoding `Enc(e)`
 
-Enc(e) outputs $\vec{m} \in \mathbb{F}_r^d$ in fixed width.
+$\mathrm{Enc}(e)$ outputs $\vec{m} \in \mathbb{F}_r^d$ in fixed width.
 
-Schema requirements per encoding_id:
+Schema requirements per `encoding_id`:
 
 - list of event types,
 - ordered fields and domains,
 - per-field mapping to scalars with reject rules,
 - interpretation (human semantics),
 - dimension d,
-- canonical schema encoding for hashing to encoding_hash.
+- canonical schema encoding for hashing to `encoding_hash`.
 
 Example (illustrative):
 
-d=4 fields: m0,m1,m2,m3 where m0+m1 encodes a total and (m2,m3) encode a relation. Out-of-domain values MUST be rejected before reduction mod r to prevent wrap-around semantics.
+$d = 4$ fields: $m_0,m_1,m_2,m_3$ where $m_0 + m_1$ encodes a total and $(m_2,m_3)$ encode a relation. Out-of-domain values MUST be rejected before reduction modulo $r$ to prevent wrap-around semantics.
 
 ### Transcript Schedule
 
@@ -420,7 +420,7 @@ Challenges:
 
 - $\alpha_i := \mathrm{H2S}(\mathrm{DST\_ALPHA}, M_{\alpha,i}) \in \mathbb{F}_r$, where `M_alpha_i = EncCBOR(["alpha", R, i])`.
 
-H2S is RFC 9380 hash_to_field with L=48 bytes and expand_message_xmd(SHA-512). [2]
+H2S is RFC 9380 `hash_to_field` with $L = 48$ bytes and `expand_message_xmd(SHA-512)`. [2]
 
 Folding:
 
@@ -450,17 +450,17 @@ Compiled policy encoding (normative):
 
 A compiled policy object is a deterministic CBOR map:
 
-- 0: version (uint=1)
-- 1: d (uint)
-- 2: k_rows (uint)
-- 3: A (array of k_rows arrays of d scalars, each scalar as bstr32 LE)
-- 4: b (array of k_rows scalars, each scalar as bstr32 LE)
+- 0: `version` (`uint` value `1`)
+- 1: $d$ (`uint`)
+- 2: `k_rows` (uint)
+- 3: $A$ (array of `k_rows` arrays of $d$ scalars, each scalar as `bstr32` LE)
+- 4: $b$ (array of `k_rows` scalars, each scalar as `bstr32` LE)
 
 `policy_hash := SHA-512(EncCBOR(policy_compiled))`. [1], [4]
 
 ### Proof System $\pi := (\pi_{\mathrm{link}}, \pi_{\mathrm{cons}})$
 
-All Schnorr NIZKs are Fiat–Shamir transformed with challenges derived from deterministic CBOR encodings that bind tags_hash and the full public statement context. RFC 8235 requires context (“OtherInfo”) formatting be fixed and explicitly defined and recommends clear boundaries between concatenated items; CBOR provides unambiguous boundaries. [1], [5]
+All Schnorr NIZKs are Fiat–Shamir transformed with challenges derived from deterministic CBOR encodings that bind `tags_hash` and the full public statement context. RFC 8235 requires context (“OtherInfo”) formatting be fixed and explicitly defined and recommends clear boundaries between concatenated items; CBOR provides unambiguous boundaries. [1], [5]
 
 Transcript-engineering libraries such as Merlin may inform implementations, but they do not replace the explicit CBOR transcript schedule defined here. [14]
 
@@ -489,7 +489,7 @@ $(\vec{m}_\star, \vec{r}_\star, \vec{\gamma})$ such that:
 
 Protocol (Schnorr multi-relation):
 
-Prover commits to random a_m,a_r,a_γ, computes T_C and T_Vj, derives c_link via H2S, returns z values. Verifier checks the standard Schnorr equations per relation.
+Prover commits to random `a_m`, `a_r`, and `a_gamma`, computes `T_C` and `T_Vj`, derives `c_link` via H2S, returns z values. Verifier checks the standard Schnorr equations per relation.
 
 Challenge:
 
@@ -554,12 +554,12 @@ Top-level object is deterministic CBOR map with unsigned integer keys:
 
 | Key | Field | Type |
 | ---: | --- | --- |
-| 0 | tags | map |
-| 1 | commitments | array of bstr32 (`C_i` encodings) |
-| 2 | transcript_root | bstr64 (`R`) |
-| 3 | folded_commitment | bstr32 (`Enc(C_star)`) |
-| 4 | policy_commitments | array length d of bstr32 (`Enc(V_j)`) |
-| 5 | proof | map |
+| 0 | `tags` | map |
+| 1 | `commitments` | array of bstr32 (`C_i` encodings) |
+| 2 | `transcript_root` | bstr64 (`R`) |
+| 3 | `folded_commitment` | bstr32 (`Enc(C_star)`) |
+| 4 | `policy_commitments` | array length $d$ of bstr32 (`Enc(V_j)`) |
+| 5 | `proof` | map |
 
 Proof object:
 
@@ -583,27 +583,27 @@ Given wire object:
 
 - Deterministic encoding and strict rejects are part of the security boundary. RFC 8949 requires protocols to be explicit about deterministic encoding choices; failing to do so risks transcript divergence. [1]
 - Ristretto decoding must reject non-canonical values and does not mask the MSB (decode differs from RFC 7748 field decoding). [3]
-- RFC 9380 hash_to_field controls modulo bias via $L$; this spec fixes $k=128$ and $L=48$ for $\mathrm{GF}(r)$. [2]
+- RFC 9380 `hash_to_field` controls modulo bias via $L$; this spec fixes $k = 128$ and $L = 48$ for $\mathrm{GF}(r)$. [2]
 - Schnorr NIZKs require fixed context binding; RFC 8235 emphasizes that OtherInfo formatting must be fixed and that item boundaries must be clear. Deterministic CBOR addresses boundary clarity while minimizing ad hoc length-prefixing. [1], [5]
-- DoS bounds: verifiers SHOULD enforce maximum N, maximum d, and maximum CBOR size; these are deployment profile parameters and must be documented per application.
+- DoS bounds: verifiers SHOULD enforce maximum $N$, maximum $d$, and maximum CBOR size; these are deployment profile parameters and must be documented per application.
 
 ### Appendix A: DST Registry and CBOR Conformance Schema
 
 DST registry (ASCII):
 
-- DST_ALPHA = `NESSA-EC:v1:alpha`
-- DST_BETA = `NESSA-EC:v1:beta`
-- DST_LINK = `NESSA-EC:v1:link`
-- DST_CONS = `NESSA-EC:v1:cons`
+- `DST_ALPHA` = `NESSA-EC:v1:alpha`
+- `DST_BETA` = `NESSA-EC:v1:beta`
+- `DST_LINK` = `NESSA-EC:v1:link`
+- `DST_CONS` = `NESSA-EC:v1:cons`
 - base DSTs: `NESSA-EC:v1:base:Br`, `...:Bm`, `...:Gpol`, `...:Hpol`
 
 CBOR schemas (v1):
 
-- tags: map keys 0..9 as specified.
+- `tags`: map keys 0..9 as specified.
 - $\pi_{\mathrm{link}}$: map `{0:T_C, 1:T_V_array, 2:z_r_array, 3:z_m_array, 4:z_gamma_array}`.
 - $\pi_{\mathrm{cons}}$: map `{0:T, 1:z}`.
 
-Arrays must have exact lengths (d, k_rows) and scalars must be bstr32.
+Arrays must have exact lengths ($d$, `k_rows`) and scalars must be `bstr32`.
 
 ### Appendix B: Deterministic CBOR Examples and Sample Transcripts
 
@@ -611,6 +611,7 @@ RFC 8949 deterministic encoding uses core deterministic ordering by lexicographi
 
 Example tags (CBOR diagnostic, from Test Vector TV-LIN-8 below):
 
+```cbor-diag
 {
   0: 1,
   1: "NESSA-EC-RISTRETTO255-SHA512-v1",
@@ -622,16 +623,21 @@ Example tags (CBOR diagnostic, from Test Vector TV-LIN-8 below):
   7: h'…64 bytes…',
   8: 2
 }
+```
 
-R0 preimage (CBOR diagnostic):
+$R_0$ preimage (CBOR diagnostic):
 
+```cbor-diag
 ["NESSA-EC:v1:R0", tags_hash]
+```
 
-R1 preimage:
+$R_1$ preimage:
 
+```cbor-diag
 ["NESSA-EC:v1:Ri", 1, R0, C1]
+```
 
-### Appendix C: Computed Test Vectors (N=8)
+### Appendix C: Computed Test Vectors ($N = 8$)
 
 The following vectors are generated directly from `impl/test_vectors.py` and serialized in `impl/test_vectors_output.json` using the corrected transcript schedule and challenge labels.
 
@@ -639,23 +645,23 @@ The following vectors are generated directly from `impl/test_vectors.py` and ser
 
 Parameters:
 
-- d = 4
-- k_rows = 2
-- N = 8
+- $d = 4$
+- `k_rows` = 2
+- $N = 8$
 - Policy rows = `[[1, 1, 0, 0], [0, 0, 3, -1]]`
 - Policy targets = `[1000, 7]`
 
 Public wire inputs (hex):
 
-- tags_cbor: `aa000101781f4e455353412d45432d52495354524554544f3235352d5348413531322d763102782472697374726574746f3235355f584d443a5348412d3531325f523235354d41505f524f5f036854562d4c494e2d38045840287034d3d090faf7a57d7c4a812225e8026fb12e6c08a0f1e07dc4dc0977d2f43da658add3b4ecff118f69bdae19d6ebd42d80a30a8ce5818fee7944a0c6e7310504066f54562d4c494e2d382d706f6c696379075840918c7bc5ec775e6cf0ce934a20e18f38cb54c3e3e7f8a3c9c29a1871c9257a5e1358fac9e16f51aae8a54ca077a258f1c6b37b82b9109836798f3b6254eb5fec0802095840778db69207a3d6dc56b6a12adc3a9923e75b3c4c5f9ec2aa8a73068a16cdebc998f8ece08d4726e24cfcf0955e03a37dfa1672503843e5617d78552078a2d2ae`
-- tags_hash: `ee8446f14a548be347b458aa56f2751af5640edf24408b325884a2ca8c65cb579ae5471159329298fc793222304f40ed51aa9b940ca6bb6ccae41cdc4e4eb0e3`
-- policy_compiled: `a500010104020203828458200100000000000000000000000000000000000000000000000000000000000000582001000000000000000000000000000000000000000000000000000000000000005820000000000000000000000000000000000000000000000000000000000000000058200000000000000000000000000000000000000000000000000000000000000000845820000000000000000000000000000000000000000000000000000000000000000058200000000000000000000000000000000000000000000000000000000000000000582003000000000000000000000000000000000000000000000000000000000000005820ecd3f55c1a631258d69cf7a2def9de140000000000000000000000000000001004825820e80300000000000000000000000000000000000000000000000000000000000058200700000000000000000000000000000000000000000000000000000000000000`
-- policy_hash: `918c7bc5ec775e6cf0ce934a20e18f38cb54c3e3e7f8a3c9c29a1871c9257a5e1358fac9e16f51aae8a54ca077a258f1c6b37b82b9109836798f3b6254eb5fec`
+- `tags_cbor`: `aa000101781f4e455353412d45432d52495354524554544f3235352d5348413531322d763102782472697374726574746f3235355f584d443a5348412d3531325f523235354d41505f524f5f036854562d4c494e2d38045840287034d3d090faf7a57d7c4a812225e8026fb12e6c08a0f1e07dc4dc0977d2f43da658add3b4ecff118f69bdae19d6ebd42d80a30a8ce5818fee7944a0c6e7310504066f54562d4c494e2d382d706f6c696379075840918c7bc5ec775e6cf0ce934a20e18f38cb54c3e3e7f8a3c9c29a1871c9257a5e1358fac9e16f51aae8a54ca077a258f1c6b37b82b9109836798f3b6254eb5fec0802095840778db69207a3d6dc56b6a12adc3a9923e75b3c4c5f9ec2aa8a73068a16cdebc998f8ece08d4726e24cfcf0955e03a37dfa1672503843e5617d78552078a2d2ae`
+- `tags_hash`: `ee8446f14a548be347b458aa56f2751af5640edf24408b325884a2ca8c65cb579ae5471159329298fc793222304f40ed51aa9b940ca6bb6ccae41cdc4e4eb0e3`
+- `policy_compiled`: `a500010104020203828458200100000000000000000000000000000000000000000000000000000000000000582001000000000000000000000000000000000000000000000000000000000000005820000000000000000000000000000000000000000000000000000000000000000058200000000000000000000000000000000000000000000000000000000000000000845820000000000000000000000000000000000000000000000000000000000000000058200000000000000000000000000000000000000000000000000000000000000000582003000000000000000000000000000000000000000000000000000000000000005820ecd3f55c1a631258d69cf7a2def9de140000000000000000000000000000001004825820e80300000000000000000000000000000000000000000000000000000000000058200700000000000000000000000000000000000000000000000000000000000000`
+- `policy_hash`: `918c7bc5ec775e6cf0ce934a20e18f38cb54c3e3e7f8a3c9c29a1871c9257a5e1358fac9e16f51aae8a54ca077a258f1c6b37b82b9109836798f3b6254eb5fec`
 
 Base encodings:
 
-- G_pol: `189e14198a4e5dfb141b576a48541cf410eb808c2d718eeaef8fea12e7efb047`
-- H_pol: `fc84a1de9950310234689fadf41b0eadc5fadc708217204d2045cf92670cc75a`
+- `G_pol`: `189e14198a4e5dfb141b576a48541cf410eb808c2d718eeaef8fea12e7efb047`
+- `H_pol`: `fc84a1de9950310234689fadf41b0eadc5fadc708217204d2045cf92670cc75a`
 - $B^r_1,\ldots,B^r_4$:
   1. `f84fd7c6f34981399e4bfdbdcfc429e17d108fc674a05422865a30e2563e871a`
   2. `88fd90f0826cff3290bfeeb6211763d28c8c4a8416089b8c5921e35d0554fe10`
@@ -680,15 +686,15 @@ Commitments $C_1,\ldots,C_8$:
 
 Transcript roots $R_0,\ldots,R_8$:
 
-- R0: `c976527b7f92a96a09238428b2584310960831e0494b135285cf38bfaddaab5f15a13b9ac00154d1a44aa72efe22eaadaea4dcc3d9f51e4e7655f22c5d02eac1`
-- R1: `de541818200bfcd65967c8392dbc8880bd8ef4d415738e353ecaec7c75f85b5c73ac9aaabaf6deec791d714357487485591f871e5b0a7656a71876d46c602eb1`
-- R2: `7dc5eca7adce9331ed424e3fc55d1495710b420ebc8b1bb2b368efa53d6618f815c427c3ef5c16a76ca621ec969f809171b9797c66b3f296ce329d67254e86e9`
-- R3: `d71b5d30e7d95588caf5cf8a28fd3c6ec8d1d325bb6cfa23532249bd4413734edfcbe40b7236d8399583bc92e4e77ed7b8f29f5e9fa0c379e12ada6ce55d0468`
-- R4: `1bcdca39dd6a017d481fd51f1e69b5c4f43da990867e66e9b7b92de81799109e8cbee60fd0ca57eb445f92a5cd6f98b8eb090bf29b17fedfb5c5b88ce7932e5a`
-- R5: `224dd25e07325792bef0fb7d88224213bdd6572c767c491a60fb788a5a924ec493b7cff158223a5821a9deffa8f04d3e218d1fdaf7158777f9147a2c98b978aa`
-- R6: `48329eac48fb2a10d293612cc0edf6444128ce6356f20650483a278d103bcd5e45b130969050ba48671518cdccd6a3d9e7aacfe1266df5ae918d3837ba4efe25`
-- R7: `38ec7f9a1e93139bfdaa4a699c083ad0cca33df26003a47ebae2354085a7baf70291f3d848b2983cec9702fa39596afbc0bc9f0015f7bd31bc020bac02c76748`
-- R8: `cbc702ee275a756538ebc7e90d9c18686efb0adc6545623a2b0aef5f011ceadbfeb9769ae7dedfd18cc0e068eceaa8d92a9accfbcad6d066cf3bfb4be1b1bab5`
+- $R_0$: `c976527b7f92a96a09238428b2584310960831e0494b135285cf38bfaddaab5f15a13b9ac00154d1a44aa72efe22eaadaea4dcc3d9f51e4e7655f22c5d02eac1`
+- $R_1$: `de541818200bfcd65967c8392dbc8880bd8ef4d415738e353ecaec7c75f85b5c73ac9aaabaf6deec791d714357487485591f871e5b0a7656a71876d46c602eb1`
+- $R_2$: `7dc5eca7adce9331ed424e3fc55d1495710b420ebc8b1bb2b368efa53d6618f815c427c3ef5c16a76ca621ec969f809171b9797c66b3f296ce329d67254e86e9`
+- $R_3$: `d71b5d30e7d95588caf5cf8a28fd3c6ec8d1d325bb6cfa23532249bd4413734edfcbe40b7236d8399583bc92e4e77ed7b8f29f5e9fa0c379e12ada6ce55d0468`
+- $R_4$: `1bcdca39dd6a017d481fd51f1e69b5c4f43da990867e66e9b7b92de81799109e8cbee60fd0ca57eb445f92a5cd6f98b8eb090bf29b17fedfb5c5b88ce7932e5a`
+- $R_5$: `224dd25e07325792bef0fb7d88224213bdd6572c767c491a60fb788a5a924ec493b7cff158223a5821a9deffa8f04d3e218d1fdaf7158777f9147a2c98b978aa`
+- $R_6$: `48329eac48fb2a10d293612cc0edf6444128ce6356f20650483a278d103bcd5e45b130969050ba48671518cdccd6a3d9e7aacfe1266df5ae918d3837ba4efe25`
+- $R_7$: `38ec7f9a1e93139bfdaa4a699c083ad0cca33df26003a47ebae2354085a7baf70291f3d848b2983cec9702fa39596afbc0bc9f0015f7bd31bc020bac02c76748`
+- $R_8$: `cbc702ee275a756538ebc7e90d9c18686efb0adc6545623a2b0aef5f011ceadbfeb9769ae7dedfd18cc0e068eceaa8d92a9accfbcad6d066cf3bfb4be1b1bab5`
 
 Challenges $\alpha_1,\ldots,\alpha_8$:
 
@@ -705,26 +711,26 @@ Folded commitment and policy commitments:
 
 - $C_\star$: `e418f98b8c0140f533664e8c4526876c499f76088d67d3bf8af928b95054b643`
 - $V_1,\ldots,V_4$:
-  - V1: `fcc9bdcc2d15286173d3008516e802b90180a187fc7128a5a512b75e03445d5d`
-  - V2: `b2d4e1b5da8ff40533d89e7cc7bb4f0a7bc0e041c7c2e002072b25c8ecbbcd6d`
-  - V3: `5a6e65add337638724761264b090b12d30d68c1da9641aae88b96e6a5333fa48`
-  - V4: `2250e483b032393ba955a822c8962f4904af701dd9359903a0ddde80cb4d0876`
+  - $V_1$: `fcc9bdcc2d15286173d3008516e802b90180a187fc7128a5a512b75e03445d5d`
+  - $V_2$: `b2d4e1b5da8ff40533d89e7cc7bb4f0a7bc0e041c7c2e002072b25c8ecbbcd6d`
+  - $V_3$: `5a6e65add337638724761264b090b12d30d68c1da9641aae88b96e6a5333fa48`
+  - $V_4$: `2250e483b032393ba955a822c8962f4904af701dd9359903a0ddde80cb4d0876`
 
 Proof $\pi_{\mathrm{link}}$:
 
-- T_C: `563ffae71ce94b46a650be9083ca3d07e6d9899f0e2411693b29854a38f7b70c`
-- T_V: `['8e79e00b09fefd6115202ff8bf81f73bb17057d2c3b888b95db35eab7bf23f57', 'c8baf90c187b3eed3f7f8f98497d5105eea8672dab4db1571ca047cad6794c0c', 'b2bf518e8d498df943f0652ee527e48c93a2a7cca2134129613a802f68a9a436', '082be7d54cd6186b1d817ce183f3aeceb1d7297f80125847ecf5ac8dc75d1075']`
-- z_r: `['aca6f4a10e0db4524166d53eafd96e50bde88e3e6c58ad88c1ca66b127202e0d', '85e35d6b39e865eae49b2ab55aebb7b94b73ce7b1ed22e0f75bf90e17b10cc08', '2b5ec711b9b7553cfaf9223fd4ac6c57ac1d70aa2e37ceddb2fc7f2731c2730c', 'a36535af31f5f14e0ac33968b0a75506eed8182607fb21aa15d4429d06cb1d0a']`
-- z_m: `['0a4ea2fea7859c30657fc765d924212445896a896adde5c25cfab9bafbd28905', 'd8db8753237e4d18dfe5a7970d527aaaf624d661d1dbbfcfa857e0be074f1903', '9b349b57f8a11803a660382a39d378b03e7464ccfa95d09ee56fbda97b223c03', 'ba06edb44f58a35c0be88cc2f7879348b34b31c6afa0e423f327c5e1ffabb40a']`
-- z_γ: `['820d4a42c04d9874350b762151889e1051c817bd8523d387a371a4f1a8d1d902', 'f80264bb338a38697f5b70961dda671adec2e15ba73322bc16104477d743fb0a', '7c233927e5e3e5b545c42173bcc7991b9101bfff94370508375e8a9863e25a07', 'd929eb80df910db824b32205a8390ad936613be9f73f33b4d9cba12b1c7e0907']`
-- c_link: `d6d4df7f8e5cc18151cf81d2de892a064c6499de9624df650ad660ae5bcf3f09`
+- `T_C`: `563ffae71ce94b46a650be9083ca3d07e6d9899f0e2411693b29854a38f7b70c`
+- `T_V`: `['8e79e00b09fefd6115202ff8bf81f73bb17057d2c3b888b95db35eab7bf23f57', 'c8baf90c187b3eed3f7f8f98497d5105eea8672dab4db1571ca047cad6794c0c', 'b2bf518e8d498df943f0652ee527e48c93a2a7cca2134129613a802f68a9a436', '082be7d54cd6186b1d817ce183f3aeceb1d7297f80125847ecf5ac8dc75d1075']`
+- `z_r`: `['aca6f4a10e0db4524166d53eafd96e50bde88e3e6c58ad88c1ca66b127202e0d', '85e35d6b39e865eae49b2ab55aebb7b94b73ce7b1ed22e0f75bf90e17b10cc08', '2b5ec711b9b7553cfaf9223fd4ac6c57ac1d70aa2e37ceddb2fc7f2731c2730c', 'a36535af31f5f14e0ac33968b0a75506eed8182607fb21aa15d4429d06cb1d0a']`
+- `z_m`: `['0a4ea2fea7859c30657fc765d924212445896a896adde5c25cfab9bafbd28905', 'd8db8753237e4d18dfe5a7970d527aaaf624d661d1dbbfcfa857e0be074f1903', '9b349b57f8a11803a660382a39d378b03e7464ccfa95d09ee56fbda97b223c03', 'ba06edb44f58a35c0be88cc2f7879348b34b31c6afa0e423f327c5e1ffabb40a']`
+- `z_gamma`: `['820d4a42c04d9874350b762151889e1051c817bd8523d387a371a4f1a8d1d902', 'f80264bb338a38697f5b70961dda671adec2e15ba73322bc16104477d743fb0a', '7c233927e5e3e5b545c42173bcc7991b9101bfff94370508375e8a9863e25a07', 'd929eb80df910db824b32205a8390ad936613be9f73f33b4d9cba12b1c7e0907']`
+- `c_link`: `d6d4df7f8e5cc18151cf81d2de892a064c6499de9624df650ad660ae5bcf3f09`
 
 Proof $\pi_{\mathrm{cons}}$:
 
-- W: `be81a652279bb04460b748f080c3352ad1ae23a32fa6685ca07f96f931edd02d`
-- T: `808e093465c0309f776561624f6551f3480b0a36e89d777e87e32803f75c450f`
-- z: `1d4346d0f9ae19bc2dde410f49f404e429cc1c06f95208496370d9dfd342b70f`
-- c_cons: `8fd414fce0639090f86deb0c548084d800bad003e30a47170f97369d7bcbd20f`
+- $W$: `be81a652279bb04460b748f080c3352ad1ae23a32fa6685ca07f96f931edd02d`
+- $T$: `808e093465c0309f776561624f6551f3480b0a36e89d777e87e32803f75c450f`
+- $z$: `1d4346d0f9ae19bc2dde410f49f404e429cc1c06f95208496370d9dfd342b70f`
+- `c_cons`: `8fd414fce0639090f86deb0c548084d800bad003e30a47170f97369d7bcbd20f`
 
 JSON bundle:
 
@@ -1057,26 +1063,26 @@ Verification summary:
 
 Parameters:
 
-- d = 3
-- N = 8
+- $d = 3$
+- $N = 8$
 
 Per-event values:
 
-- e1: x=2, y=5, z=10
-- e2: x=5, y=12, z=60
-- e3: x=8, y=19, z=152
-- e4: x=11, y=26, z=286
-- e5: x=14, y=33, z=462
-- e6: x=17, y=40, z=680
-- e7: x=20, y=47, z=940
-- e8: x=23, y=54, z=1242
+- $e_1$: $x = 2$, $y = 5$, $z = 10$
+- $e_2$: $x = 5$, $y = 12$, $z = 60$
+- $e_3$: $x = 8$, $y = 19$, $z = 152$
+- $e_4$: $x = 11$, $y = 26$, $z = 286$
+- $e_5$: $x = 14$, $y = 33$, $z = 462$
+- $e_6$: $x = 17$, $y = 40$, $z = 680$
+- $e_7$: $x = 20$, $y = 47$, $z = 940$
+- $e_8$: $x = 23$, $y = 54$, $z = 1242$
 
 Folded values:
 
 - $x_\star$ = `c3bd5d9698764d0fb66d4c2bebeee43a9a2285e955230682ae4ca08fafef260e`
 - $y_\star$ = `41b465c89be253bb6bc7dd2cc74fe5c25903c1e63d200531fd377a70a3cca502`
 - $z_\star$ = `04785385d765ce2a34454554ced9515cf645c0b90ae76537538d40fe75590b06`
-- E = `9964587ac4e063de167517cc7263134c5a2c648e88bbd57a06261aef9a92b804`
+- $E$ = `9964587ac4e063de167517cc7263134c5a2c648e88bbd57a06261aef9a92b804`
 - Identity: $x_\star y_\star \equiv z_\star + E \pmod L$
 - Identity holds: `True`
 
@@ -1217,11 +1223,11 @@ JSON bundle:
 ## Required Protocol Decisions / Open Items
 
 Item: Hidden count/order profile
-Why it matters: $\alpha_i$ derivation requires an index domain; hiding N and/or order requires padding or redesign.
-Exact decision needed: Decide whether v1 leakage (N/order visible) is acceptable or whether a padded length L is required as default.
-Allowed options: (a) N/order public (v1); (b) padded L with dummy events and defined dummy semantics; (c) redesigned accumulator proven inside $\pi$.
+Why it matters: $\alpha_i$ derivation requires an index domain; hiding $N$ and/or order requires padding or redesign.
+Exact decision needed: Decide whether v1 leakage ($N$/order visible) is acceptable or whether a padded length $L$ is required as default.
+Allowed options: (a) $N$/order public (v1); (b) padded $L$ with dummy events and defined dummy semantics; (c) redesigned accumulator proven inside $\pi$.
 Consequence if unresolved: Cannot claim count/order hiding in v1.
-Safe fallback exists: yes, v1 treats N/order as visible.
+Safe fallback exists: yes, v1 treats $N$/order as visible.
 
 Item: Hidden commitment list $\{C_i\}$ mode
 Why it matters: If commitments are not provided, the verifier cannot recompute $R$ and $\alpha_i$ unless a proof of the accumulator relation is included.
@@ -1257,7 +1263,7 @@ Specification-level changes:
 - Ciphersuite, suite identifiers, H2G/H2S, and DST registry are frozen to RFC 9380/9496 and SHA-512. [2], [3], [4]
 - Commitment Profile V2 is made dimensionally consistent.
 - Proof system fully specified as $\pi_{\mathrm{link}} + \pi_{\mathrm{cons}}$; removed infeasible IPA-extraction language and replaced with proved relations grounded in Schnorr NIZK. [5]
-- Added computed N=8 test vectors (linear end-to-end plus non-linear folding example).
+- Added computed $N = 8$ test vectors (linear end-to-end plus non-linear folding example).
 
 Claims downgraded to goals:
 
