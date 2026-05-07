@@ -102,7 +102,7 @@ Resulting whitepaper change: Added a normatively frozen DST registry and require
 Affected sections: commitment definition; folding equations; notation for $r_\star$.
 Audit source(s): first-pass D-005.
 Disposition: APPLY AS WRITTEN (design decision fixes to V2).
-Explanation: Commitment Profile V2 is used consistently: $\operatorname{Com}(\vec{m}; \vec{r})$ uses vector blinding and two base families. Folded openings are vectors, not scalars.
+Explanation: Commitment Profile V2 is used consistently: $\mathrm{Com}(\vec{m}; \vec{r})$ uses vector blinding and two base families. Folded openings are vectors, not scalars.
 Authority basis: Linear commitment homomorphism is standard for Pedersen-style commitments; Bulletproofs discusses Pedersen commitments as inputs and relies on discrete log security. [6]
 Resulting whitepaper change: Removed scalar-only commitment definitions from normative text; all equations use $\vec{r} \in \mathbb{F}_r^d$.
 
@@ -241,7 +241,7 @@ Explanation: Not supported in v1; listed as open item requiring either a proof o
 Affected sections: commitment definition.
 Audit source(s): second-pass SP-010.
 Disposition: APPLY AS WRITTEN.
-Explanation: Commitment equation is fixed to $\sum_j(r_j G_j + m_j H_j)$ with explicit base derivation and vector blinding. [6], [9]
+Explanation: Commitment equation is fixed to $\sum_j(r_j B^r_j + m_j B^m_j)$ with explicit base derivation and vector blinding. [6], [9]
 
 ## NESSA qFold-EC Protocol Specification
 
@@ -288,7 +288,7 @@ Declared leakage in v1:
 
 This specification fixes:
 
-- $H_{\mathrm{tr}} = \mathrm{SHA\text{-}512}$ (FIPS 180-4). [4]
+- $H_{\mathrm{tr}} = \mathrm{SHA512}$, denoting SHA-512 from FIPS 180-4. [4]
 - H2G = RFC 9380 hash_to_ristretto255 (expand_message_xmd(SHA-512), output length 64, then ristretto255_map). RFC 9380 defines this construction and states the REQUIRED identifier for this instantiation. [2]
 - REQUIRED identifier bound in tags: `ristretto255_XMD:SHA-512_R255MAP_RO_`. [2]
 
@@ -339,7 +339,7 @@ Tags τ is a deterministic CBOR map with unsigned integer keys.
 | 8 | k_rows | uint | number of linear constraints |
 | 9 | transcript_seed | bstr(64) | OPTIONAL; hash of signature/proof-chain digest |
 
-`tags_hash := SHA-512(EncCBOR(τ))`. [1], [4]
+`tags_hash := SHA-512(EncCBOR(τ))`. In formulas below, `SHA512(...)` denotes SHA-512 applied to bytes. [1], [4]
 
 Implementation note: this repository currently serializes `encoding_id` and `policy_id` as application-defined strings for interoperability with higher-level APIs, while preserving the same keyed map structure and hashing rules.
 
@@ -358,7 +358,7 @@ Base derivation (normative):
 For each base label and index j, derive a ristretto point via:
 
 $$
-P := \operatorname{hash\_to\_ristretto255}(\mathrm{msg}, \mathrm{DST})
+P := \mathrm{hash\_to\_ristretto255}(\mathrm{msg}, \mathrm{DST})
 $$
 
 where hash_to_ristretto255 is RFC 9380 (expand_message_xmd(SHA-512), 64 bytes, then ristretto255_map). [2], [3]
@@ -381,8 +381,8 @@ Commitment:
 For $\vec{m} \in \mathbb{F}_r^d$ and $\vec{r} \in \mathbb{F}_r^d$,
 
 $$
-\operatorname{Com}(\vec{m}; \vec{r}) :=
-\sum_{j=1}^{d} \left(r_j B^r_j + m_j B^m_j\right) \in \mathbb{G}.
+\mathrm{Com}(\vec{m}; \vec{r}) :=
+\sum_{j=1}^{d} (r_j B^r_j + m_j B^m_j) \in \mathbb{G}.
 $$
 
 ### Event Encoding Enc(e)
@@ -410,15 +410,15 @@ Commitment list semantics (v1):
 
 Transcript root:
 
-Let `tags_hash` be as above. Let $\operatorname{Enc}(C_i)$ be the 32-byte encoding of $C_i$.
+Let `tags_hash` be as above. Let $\mathrm{Enc}(C_i)$ be the 32-byte encoding of $C_i$.
 
-- $R_0 := \mathrm{SHA\text{-}512}(\operatorname{EncCBOR}([\text{"NESSA-EC:v1:R0"}, \mathrm{tags\_hash}]))$
-- For $i = 1,\ldots,N$: $R_i := \mathrm{SHA\text{-}512}(\operatorname{EncCBOR}([\text{"NESSA-EC:v1:Ri"}, i, R_{i-1}, \operatorname{Enc}(C_i)]))$
+- $R_0 := \mathrm{SHA512}(M_{R0})$, where `M_R0 = EncCBOR(["NESSA-EC:v1:R0", tags_hash])`.
+- For $i = 1,\ldots,N$: $R_i := \mathrm{SHA512}(M_{Ri})$, where `M_Ri = EncCBOR(["NESSA-EC:v1:Ri", i, R_{i-1}, Enc(C_i)])`.
 - $R := R_N$
 
 Challenges:
 
-- $\alpha_i := \operatorname{H2S}(\mathrm{DST\_ALPHA}, \operatorname{EncCBOR}([\text{"alpha"}, R, i])) \in \mathbb{F}_r$
+- $\alpha_i := \mathrm{H2S}(\mathrm{DST\_ALPHA}, M_{\alpha,i}) \in \mathbb{F}_r$, where `M_alpha_i = EncCBOR(["alpha", R, i])`.
 
 H2S is RFC 9380 hash_to_field with L=48 bytes and expand_message_xmd(SHA-512). [2]
 
@@ -484,7 +484,7 @@ Witness:
 
 $(\vec{m}_\star, \vec{r}_\star, \vec{\gamma})$ such that:
 
-- $C_\star = \operatorname{Com}(\vec{m}_\star; \vec{r}_\star)$
+- $C_\star = \mathrm{Com}(\vec{m}_\star; \vec{r}_\star)$
 - For all $j = 1,\ldots,d$: $V_j = \gamma_j G_{\mathrm{pol}} + m_{\star,j} H_{\mathrm{pol}}$
 
 Protocol (Schnorr multi-relation):
@@ -495,9 +495,10 @@ Challenge:
 
 $$
 c_{\mathrm{link}} :=
-\operatorname{H2S}(\mathrm{DST\_LINK},
-\operatorname{EncCBOR}([\text{"link"}, \mathrm{tags\_hash}, R, \operatorname{Enc}(C_\star), \operatorname{Enc}(V_1,\ldots,V_d), \operatorname{Enc}(T_C), \operatorname{Enc}(T_V)])).
+\mathrm{H2S}(\mathrm{DST\_LINK}, M_{\mathrm{link}}).
 $$
+
+Here `M_link = EncCBOR(["link", tags_hash, R, Enc(C_star), Enc(V_1), ..., Enc(V_d), Enc(T_C), Enc(T_V_1), ..., Enc(T_V_d)])`.
 
 #### $\pi_{\mathrm{cons}}$: Linear Constraints Proof via Compression
 
@@ -506,8 +507,10 @@ Goal: prove $A \cdot \vec{m}_\star = s \cdot b$ without revealing $\vec{m}_\star
 Verifier derives $\beta_l$ for $l = 1,\ldots,k$:
 
 $$
-\beta_l := \operatorname{H2S}(\mathrm{DST\_BETA}, \operatorname{EncCBOR}([\text{"beta"}, R, \mathrm{policy\_hash}, l])).
+\beta_l := \mathrm{H2S}(\mathrm{DST\_BETA}, M_{\beta,l}).
 $$
+
+Here `M_beta_l = EncCBOR(["beta", R, policy_hash, l])`.
 
 Compute:
 
@@ -532,9 +535,10 @@ Challenge:
 
 $$
 c_{\mathrm{cons}} :=
-\operatorname{H2S}(\mathrm{DST\_CONS},
-\operatorname{EncCBOR}([\text{"cons"}, \mathrm{tags\_hash}, R, \mathrm{policy\_hash}, \operatorname{Enc}(W), \operatorname{Enc}(T)])).
+\mathrm{H2S}(\mathrm{DST\_CONS}, M_{\mathrm{cons}}).
 $$
+
+Here `M_cons = EncCBOR(["cons", tags_hash, R, policy_hash, Enc(W), Enc(T)])`.
 
 Verifier check:
 
