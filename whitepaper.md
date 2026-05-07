@@ -358,7 +358,7 @@ Base derivation (normative):
 For each base label and index j, derive a ristretto point via:
 
 $$
-P := \mathrm{hash\_to\_ristretto255}(\mathrm{msg}, \mathrm{DST})
+P := \mathrm{hash\\_to\\_ristretto255}(\mathrm{msg}, \mathrm{DST})
 $$
 
 where hash_to_ristretto255 is RFC 9380 (expand_message_xmd(SHA-512), 64 bytes, then ristretto255_map). [2], [3]
