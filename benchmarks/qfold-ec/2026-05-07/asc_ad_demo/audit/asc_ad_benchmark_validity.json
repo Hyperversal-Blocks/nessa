@@ -1,0 +1,124 @@
+{
+  "observations": {
+    "all_batch_passed": true,
+    "all_single_verify_passed": true,
+    "constant_proof_size": true,
+    "proof_sizes": [
+      1632
+    ]
+  },
+  "sizes": [
+    1,
+    2,
+    4,
+    8,
+    16,
+    32,
+    64,
+    128,
+    256,
+    512,
+    1024,
+    2048,
+    4096
+  ],
+  "validity_counts": {
+    "batch_fail": 0,
+    "batch_pass": 13,
+    "single_fail": 0,
+    "single_pass": 13
+  },
+  "validity_matrix": [
+    {
+      "N": 1,
+      "batch_ok": true,
+      "single_eligibility_valid": true,
+      "single_ok": true,
+      "single_proof_valid": true
+    },
+    {
+      "N": 2,
+      "batch_ok": true,
+      "single_eligibility_valid": true,
+      "single_ok": true,
+      "single_proof_valid": true
+    },
+    {
+      "N": 4,
+      "batch_ok": true,
+      "single_eligibility_valid": true,
+      "single_ok": true,
+      "single_proof_valid": true
+    },
+    {
+      "N": 8,
+      "batch_ok": true,
+      "single_eligibility_valid": true,
+      "single_ok": true,
+      "single_proof_valid": true
+    },
+    {
+      "N": 16,
+      "batch_ok": true,
+      "single_eligibility_valid": true,
+      "single_ok": true,
+      "single_proof_valid": true
+    },
+    {
+      "N": 32,
+      "batch_ok": true,
+      "single_eligibility_valid": true,
+      "single_ok": true,
+      "single_proof_valid": true
+    },
+    {
+      "N": 64,
+      "batch_ok": true,
+      "single_eligibility_valid": true,
+      "single_ok": true,
+      "single_proof_valid": true
+    },
+    {
+      "N": 128,
+      "batch_ok": true,
+      "single_eligibility_valid": true,
+      "single_ok": true,
+      "single_proof_valid": true
+    },
+    {
+      "N": 256,
+      "batch_ok": true,
+      "single_eligibility_valid": true,
+      "single_ok": true,
+      "single_proof_valid": true
+    },
+    {
+      "N": 512,
+      "batch_ok": true,
+      "single_eligibility_valid": true,
+      "single_ok": true,
+      "single_proof_valid": true
+    },
+    {
+      "N": 1024,
+      "batch_ok": true,
+      "single_eligibility_valid": true,
+      "single_ok": true,
+      "single_proof_valid": true
+    },
+    {
+      "N": 2048,
+      "batch_ok": true,
+      "single_eligibility_valid": true,
+      "single_ok": true,
+      "single_proof_valid": true
+    },
+    {
+      "N": 4096,
+      "batch_ok": true,
+      "single_eligibility_valid": true,
+      "single_ok": true,
+      "single_proof_valid": true
+    }
+  ]
+}
