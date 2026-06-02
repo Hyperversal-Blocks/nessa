@@ -145,3 +145,6 @@ NESSA is designed for developers building:
   whitepaper that this copy replaced.
 - [NESSA website and demos](https://nessa.sh/v1/)
 - [Letter of Association with National Incubation Center](https://drive.google.com/file/d/1iDUh_AQjsN8puyP8zXosPuUcbNIHPS_T/view?usp=drive_link)
+
+## Grants and Donations
+- [Giveth](https://giveth.io/project/nessa)
