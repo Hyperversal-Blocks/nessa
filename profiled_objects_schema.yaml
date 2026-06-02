@@ -1,0 +1,1680 @@
+openapi: 3.0.3
+info:
+  title: NESSA qFold Object Schemas
+  version: 0.1.0
+  description: |
+    Component-only OpenAPI v3 schema catalog for the objects currently present in
+    the NESSA qFold-PQ Go harness, qFold-EC Python reference implementation, ASC
+    Go/Python integration, and gateway demo.
+
+    This file intentionally separates implemented wire/runtime objects from
+    product-level envelope names that are not implemented yet. `ProofRequest`,
+    `VerifierResponse`, `PrivacyReceipt`, `ContextBinding`, `NonceBinding`,
+    `ReplayPolicy`, `RetentionNotice`, `VerifierFacingMetadata`, and
+    `RejectedOrInvalidRequestResponse` are empty placeholder schemas.
+
+    Secret witness openings are also intentionally omitted from public schemas:
+    Go `Opening` and `ScalarOpening` exist internally, but `Commitment.Open` and
+    `ScalarCommitment.Open` are tagged `json:"-"` and are not verifier-facing
+    wire fields.
+servers: []
+paths: {}
+
+x-source-files:
+  - apps/nessa/pkg/qfoldpq/qfold_pq.go
+  - apps/nessa/pkg/asc/api_server.go
+  - apps/nessa/pkg/asc/single_wallet.go
+  - apps/nessa-ec/third_party/qfold-ec-py/impl/nessa_qfold.py
+  - apps/nessa-ec/third_party/qfold-ec-py/impl/usecase_flows.py
+  - apps/nessa-ec/third_party/qfold-ec-py/impl/asc_ad_demo.py
+  - apps/nessa-ec/third_party/qfold-ec-py/impl/integration_gateway.py
+
+x-implemented-object-index:
+  qfold_pq_go:
+    - Params
+    - Commitment
+    - ScalarCommitment
+    - LinearRelProof
+    - LinkProof
+    - ProductProof
+    - VerifierCredential
+    - ProofContext
+    - Attestation
+    - LinearBundle
+    - NonlinearBundle
+  qfold_ec_python:
+    - Event
+    - TranscriptState
+    - ProofLink
+    - ProofConsLinear
+    - ProofConsNonlinear
+    - NessaProof
+    - BenchmarkResult
+    - ProtocolFlow
+    - flow_folded_object
+    - flow_proof_payload
+    - flow_to_wallet_bundle
+    - UserProofStory
+    - UsecaseResult
+  asc_integration:
+    - MetadataProfile
+    - AdMetadataProfile
+    - createWalletRequest
+    - updateMetadataRequest
+    - campaignConfig
+    - CampaignConfig
+    - selectiveDisclosureRequest
+    - verifierCentricFlowRequest
+    - userCentricFlowRequest
+    - benchmarkRequest
+    - stressRequest
+    - apiError
+    - AdCampaign
+    - AdVerificationReceipt
+    - SyntheticUser
+  gateway_demo:
+    - GatewayPolicy
+    - ProverReadiness
+    - VerifierReceipt
+
+x-placeholder-object-index:
+  - ProofRequest
+  - VerifierResponse
+  - PrivacyReceipt
+  - ContextBinding
+  - NonceBinding
+  - ReplayPolicy
+  - RetentionNotice
+  - VerifierFacingMetadata
+  - RejectedOrInvalidRequestResponse
+
+x-verification-summary:
+  verified_at: '2026-06-02'
+  result: source_cross_checked
+  notes:
+    - qfold-pq Go public JSON structs are represented by their json tags; private witness openings are omitted because they are tagged json:"-".
+    - qFold-EC Python dataclasses and wire helper payloads are represented as JSON-compatible hex projections for byte fields.
+    - Product-level request, response, receipt, context, nonce, replay, retention, and verifier metadata envelopes were not found as concrete implementation objects and remain empty placeholders.
+    - EC non-linear proof fields are documented as an implemented Python object but not as a normative EC v1 production claim.
+    - ASC denied bundles can omit folded_object and proof; allowed bundles bind request.context_digest to folded_object.proof_context_label.
+
+x-validation-rules:
+  request_structure:
+    - Product-level ProofRequest is a placeholder until implemented; concrete ASC bundles currently use request.context_digest plus folded_object.proof_context_label.
+    - Reject unknown or malformed concrete proof-engine fields at the verifier boundary.
+  request_hash:
+    - Product-level canonical request hash is not implemented as a dedicated object yet.
+    - Implemented context binding uses qfold-pq ProofContext, ASC context_digest, proof_context_label, transcript roots, policy hashes, and compiler hashes.
+  verifier_signature:
+    - qfold-pq VerifierCredential uses verifier_id, action_id, policy_hash, epoch, expires_at, audience, and sig.
+    - Production signatures are not implemented in qfold-pq v3; the harness uses an HMAC-style test credential.
+  expiry:
+    - qfold-pq verifier rejects when now is greater than ProofContext.expires_at.
+    - Gateway freshness is enforced by server nonce, rate window, and usage budget in the Python gateway demo.
+  nonce:
+    - GatewayVerifier issues a nonce and rejects nonce mismatch or previously used nonce.
+    - qfold-pq uses context nullifier_hash for verifier-side replay checks.
+  context_binding:
+    - qfold-pq verifier requires the provided expected ProofContext to exactly match the bundle context.
+    - ASC verifier recomputes campaign-bound context_digest and checks both request.context_digest and folded_object.proof_context_label.
+  disclosure_limits:
+    - ASC selective disclosure exposes only requested dotted fields.
+    - ASC redactors strip prover_identity, raw_profile, user_secret_digest, material previews, and denied-case detail where applicable.
+  response_binding:
+    - Implemented responses are AdVerificationReceipt and VerifierReceipt, not a product VerifierResponse object.
+    - qfold-pq LinearBundle and NonlinearBundle bind proof profile, policy hash, compiler hash, verifier credential, issuer registry, nullifier, expiry, and transcript roots.
+  replay_status:
+    - Reuse of a consumed nullifier in qfold-pq is rejected.
+    - Reuse of an already seen gateway nonce is rejected as replay_detected.
+  privacy_receipt_consistency:
+    - Product PrivacyReceipt is not implemented as a dedicated schema.
+    - Implemented receipt consistency is represented by AdVerificationReceipt fields and gateway VerifierReceipt fields.
+
+x-replay-nullifier-model:
+  accepted_cases:
+    - A fresh gateway nonce is presented once with an otherwise valid proof bundle.
+    - A qfold-pq context contains a nullifier_hash not present in the verifier used-nullifier set.
+    - A reusable verifier request is accepted only if the application intentionally scopes each response to a fresh nonce or distinct nullifier.
+  rejected_cases:
+    - Gateway expected_nonce does not match wire_bundle.gateway_meta.server_nonce.
+    - Gateway expected_nonce was already recorded in the verifier nonce set.
+    - qfold-pq used map already contains ProofContext.nullifier_hash.
+    - ASC verifier sees a duplicate nullifier for the campaign.
+
+components:
+  schemas:
+    HexString:
+      type: string
+      pattern: '^[0-9a-fA-F]+$'
+      description: Hex-encoded byte string.
+    Hex32:
+      type: string
+      pattern: '^[0-9a-fA-F]{64}$'
+      description: 32-byte value encoded as 64 hex characters.
+    Hex64:
+      type: string
+      pattern: '^[0-9a-fA-F]{128}$'
+      description: 64-byte value encoded as 128 hex characters.
+    HashHex:
+      allOf:
+        - $ref: '#/components/schemas/HexString'
+      description: Hash value encoded as lowercase hex in current generated objects.
+    Int64:
+      type: integer
+      format: int64
+    Vec:
+      type: array
+      description: qfold-pq vector over the harness modulus.
+      items:
+        $ref: '#/components/schemas/Int64'
+    Mat:
+      type: array
+      description: qfold-pq matrix represented as row vectors.
+      items:
+        $ref: '#/components/schemas/Vec'
+    ECPointHex:
+      allOf:
+        - $ref: '#/components/schemas/Hex32'
+      description: Ristretto255 point encoded as 32 bytes and serialized as hex in Python wire helpers.
+    ECScalarHex:
+      allOf:
+        - $ref: '#/components/schemas/Hex32'
+      description: Ristretto255 scalar encoded as 32 bytes and serialized as hex in Python wire helpers.
+    OptionalHex64:
+      type: string
+      pattern: '^$|^[0-9a-fA-F]{128}$'
+      description: Empty string or 64-byte SHA-512 digest encoded as 128 hex characters.
+
+    ProofRequest:
+      type: object
+      additionalProperties: true
+      description: Empty placeholder. No concrete product-level ProofRequest object is implemented in qfold-pq or the qFold Python reference yet.
+    VerifierResponse:
+      type: object
+      additionalProperties: true
+      description: Empty placeholder. Concrete implemented verifier outputs are AdVerificationReceipt and VerifierReceipt.
+    PrivacyReceipt:
+      type: object
+      additionalProperties: true
+      description: Empty placeholder. A dedicated privacy receipt object is not implemented yet.
+    ContextBinding:
+      type: object
+      additionalProperties: true
+      description: Empty placeholder. Implemented context binding is currently ProofContext, ASCProofRequestContext, proof_context_label, and gateway nonce metadata.
+    NonceBinding:
+      type: object
+      additionalProperties: true
+      description: Empty placeholder. Gateway nonce behavior exists, but not as a standalone schema object.
+    ReplayPolicy:
+      type: object
+      additionalProperties: true
+      description: Empty placeholder. Replay behavior is implemented through used nonce/nullifier sets, not a standalone policy object.
+    RetentionNotice:
+      type: object
+      additionalProperties: true
+      description: Empty placeholder. No retention notice object exists in the inspected implementation.
+    VerifierFacingMetadata:
+      type: object
+      additionalProperties: true
+      description: Empty placeholder. Concrete verifier-facing metadata appears in ASCMeta and receipt objects.
+    RejectedOrInvalidRequestResponse:
+      type: object
+      additionalProperties: true
+      description: Empty placeholder for the product-level rejected/invalid request response. Concrete errors are APIError or denied ASC bundles.
+
+    Params:
+      type: object
+      description: qfold-pq deterministic parameter set derived from the proof context.
+      required: [suite, q, k, d, n_rho, A, G, Hpol]
+      additionalProperties: false
+      properties:
+        suite:
+          type: string
+          enum: [NESSA-PQ-QFOLD-STATE-FIXED-FLOW-GO-v3]
+        q:
+          $ref: '#/components/schemas/Int64'
+        k:
+          type: integer
+        d:
+          type: integer
+        n_rho:
+          type: integer
+        A:
+          $ref: '#/components/schemas/Mat'
+        G:
+          $ref: '#/components/schemas/Mat'
+        Hpol:
+          $ref: '#/components/schemas/Vec'
+
+    Commitment:
+      type: object
+      description: Public qfold-pq row commitment. The internal opening is intentionally not serialized.
+      required: [C]
+      additionalProperties: false
+      properties:
+        C:
+          $ref: '#/components/schemas/Vec'
+
+    ScalarCommitment:
+      type: object
+      description: Public qfold-pq scalar commitment. The internal scalar opening is intentionally not serialized.
+      required: [V]
+      additionalProperties: false
+      properties:
+        V:
+          $ref: '#/components/schemas/Vec'
+
+    LinearRelProof:
+      type: object
+      description: qfold-pq masked bounded proof of a linear relation Y = M*x mod Q.
+      required: [T, c, z, bound]
+      additionalProperties: false
+      properties:
+        T:
+          $ref: '#/components/schemas/Vec'
+        c:
+          $ref: '#/components/schemas/Int64'
+        z:
+          $ref: '#/components/schemas/Vec'
+        bound:
+          $ref: '#/components/schemas/Int64'
+
+    LinkProof:
+      type: object
+      description: qfold-pq link proof that C_star and scalar commitments open to one shared folded witness.
+      required: [rel]
+      additionalProperties: false
+      properties:
+        rel:
+          $ref: '#/components/schemas/LinearRelProof'
+
+    ProductProof:
+      type: object
+      description: qfold-pq committed-scalar multiplication proof for X * Y = Z.
+      required: [T_a, T_b, T_0, T_cross, c, z_a, z_b, z_o, proof_a, proof_b, proof_o]
+      additionalProperties: false
+      properties:
+        T_a:
+          $ref: '#/components/schemas/Vec'
+        T_b:
+          $ref: '#/components/schemas/Vec'
+        T_0:
+          $ref: '#/components/schemas/Vec'
+        T_cross:
+          $ref: '#/components/schemas/Vec'
+        c:
+          $ref: '#/components/schemas/Int64'
+        z_a:
+          $ref: '#/components/schemas/Int64'
+        z_b:
+          $ref: '#/components/schemas/Int64'
+        z_o:
+          $ref: '#/components/schemas/Int64'
+        proof_a:
+          $ref: '#/components/schemas/LinearRelProof'
+        proof_b:
+          $ref: '#/components/schemas/LinearRelProof'
+        proof_o:
+          $ref: '#/components/schemas/LinearRelProof'
+
+    VerifierCredential:
+      type: object
+      description: qfold-pq verifier-issued credential binding verifier identity, action, policy, epoch, expiry, and audience.
+      required: [verifier_id, action_id, policy_hash, epoch, expires_at, audience, sig]
+      additionalProperties: false
+      properties:
+        verifier_id:
+          type: string
+        action_id:
+          type: string
+        policy_hash:
+          type: string
+        epoch:
+          $ref: '#/components/schemas/Int64'
+        expires_at:
+          $ref: '#/components/schemas/Int64'
+        audience:
+          type: string
+        sig:
+          type: string
+
+    ProofContext:
+      type: object
+      description: qfold-pq transcript and verifier context. The verifier requires exact context equality and recomputes parameters from this object.
+      required:
+        - verifier_id
+        - action_id
+        - policy_hash
+        - compiler_hash
+        - epoch
+        - nullifier_hash
+        - issuer_registry_hash
+        - verifier_credential_hash
+        - proof_profile
+        - expires_at
+      additionalProperties: false
+      properties:
+        verifier_id:
+          type: string
+        action_id:
+          type: string
+        policy_hash:
+          type: string
+        compiler_hash:
+          type: string
+        epoch:
+          $ref: '#/components/schemas/Int64'
+        nullifier_hash:
+          type: string
+        issuer_registry_hash:
+          type: string
+        verifier_credential_hash:
+          type: string
+        proof_profile:
+          type: string
+          enum: [NESSA-PQ-QFOLD-STATE-FIXED-FLOW-GO-v3]
+        expires_at:
+          $ref: '#/components/schemas/Int64'
+
+    Attestation:
+      type: object
+      description: qfold-pq issuer attestation over a row commitment and policy provenance.
+      required: [issuer_id, subject, schema_hash, commitment_hash, policy_hash, epoch, sig]
+      additionalProperties: false
+      properties:
+        issuer_id:
+          type: string
+        subject:
+          type: string
+        schema_hash:
+          type: string
+        commitment_hash:
+          type: string
+        policy_hash:
+          type: string
+        epoch:
+          $ref: '#/components/schemas/Int64'
+        sig:
+          type: string
+
+    LinearBundle:
+      type: object
+      description: qfold-pq linear proof bundle with commitments, context, row proofs, folded commitment, and folded policy proof.
+      required:
+        - params
+        - context
+        - verifier_credential
+        - schema_hash
+        - commitments
+        - attestations
+        - C_star
+        - V
+        - row_v
+        - row_links
+        - row_policy_proofs
+        - A
+        - b
+        - root
+        - alphas
+        - s
+        - link
+        - policy_proof
+      additionalProperties: false
+      properties:
+        params:
+          $ref: '#/components/schemas/Params'
+        context:
+          $ref: '#/components/schemas/ProofContext'
+        verifier_credential:
+          $ref: '#/components/schemas/VerifierCredential'
+        schema_hash:
+          type: string
+        commitments:
+          type: array
+          items:
+            $ref: '#/components/schemas/Vec'
+        attestations:
+          type: array
+          items:
+            $ref: '#/components/schemas/Attestation'
+        C_star:
+          $ref: '#/components/schemas/Vec'
+        V:
+          type: array
+          items:
+            $ref: '#/components/schemas/Vec'
+        row_v:
+          type: array
+          items:
+            type: array
+            items:
+              $ref: '#/components/schemas/Vec'
+        row_links:
+          type: array
+          items:
+            $ref: '#/components/schemas/LinkProof'
+        row_policy_proofs:
+          type: array
+          items:
+            $ref: '#/components/schemas/LinearRelProof'
+        A:
+          $ref: '#/components/schemas/Mat'
+        b:
+          $ref: '#/components/schemas/Vec'
+        root:
+          type: string
+        alphas:
+          $ref: '#/components/schemas/Vec'
+        s:
+          $ref: '#/components/schemas/Int64'
+        link:
+          $ref: '#/components/schemas/LinkProof'
+        policy_proof:
+          $ref: '#/components/schemas/LinearRelProof'
+
+    NonlinearRowV:
+      type: array
+      description: Three scalar commitment vectors for L, R, and O in the qfold-pq multiplication-gate profile.
+      minItems: 3
+      maxItems: 3
+      items:
+        $ref: '#/components/schemas/Vec'
+
+    NonlinearBundle:
+      type: object
+      description: qfold-pq non-linear multiplication-gate state proof bundle.
+      required:
+        - params
+        - context
+        - verifier_credential
+        - schema_hash
+        - commitments
+        - attestations
+        - root
+        - alphas
+        - row_v
+        - row_links
+        - row_mul
+        - VL_acc
+        - VR_acc
+        - VO_acc
+        - CE_acc
+        - cross1
+        - cross2
+        - VT1
+        - VT2
+        - final_mul
+      additionalProperties: false
+      properties:
+        params:
+          $ref: '#/components/schemas/Params'
+        context:
+          $ref: '#/components/schemas/ProofContext'
+        verifier_credential:
+          $ref: '#/components/schemas/VerifierCredential'
+        schema_hash:
+          type: string
+        commitments:
+          type: array
+          items:
+            $ref: '#/components/schemas/Vec'
+        attestations:
+          type: array
+          items:
+            $ref: '#/components/schemas/Attestation'
+        root:
+          type: string
+        alphas:
+          $ref: '#/components/schemas/Vec'
+        row_v:
+          type: array
+          items:
+            $ref: '#/components/schemas/NonlinearRowV'
+        row_links:
+          type: array
+          items:
+            $ref: '#/components/schemas/LinkProof'
+        row_mul:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductProof'
+        VL_acc:
+          type: array
+          items:
+            $ref: '#/components/schemas/Vec'
+        VR_acc:
+          type: array
+          items:
+            $ref: '#/components/schemas/Vec'
+        VO_acc:
+          type: array
+          items:
+            $ref: '#/components/schemas/Vec'
+        CE_acc:
+          type: array
+          items:
+            $ref: '#/components/schemas/Vec'
+        cross1:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductProof'
+        cross2:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductProof'
+        VT1:
+          type: array
+          items:
+            $ref: '#/components/schemas/Vec'
+        VT2:
+          type: array
+          items:
+            $ref: '#/components/schemas/Vec'
+        final_mul:
+          $ref: '#/components/schemas/ProductProof'
+
+    EventEC:
+      type: object
+      description: qFold-EC Event dataclass containing one execution event before scalar-field encoding.
+      required: [values]
+      additionalProperties: false
+      properties:
+        values:
+          type: array
+          items:
+            type: integer
+
+    TranscriptStateEC:
+      type: object
+      description: qFold-EC transcript state with canonical tags hash, transcript roots, and alpha challenges.
+      required: [tags, tags_hash, roots, alphas]
+      additionalProperties: false
+      properties:
+        tags:
+          type: object
+          additionalProperties: true
+        tags_hash:
+          $ref: '#/components/schemas/Hex64'
+        roots:
+          type: array
+          items:
+            $ref: '#/components/schemas/Hex64'
+        alphas:
+          type: array
+          items:
+            $ref: '#/components/schemas/ECScalarHex'
+
+    ProofLinkEC:
+      type: object
+      description: qFold-EC pi_link proof serialized by Python wire helpers.
+      required: [T_commit, T_policy, z_m, z_rho, z_gamma, challenge]
+      additionalProperties: false
+      properties:
+        T_commit:
+          $ref: '#/components/schemas/ECPointHex'
+        T_policy:
+          type: array
+          items:
+            $ref: '#/components/schemas/ECPointHex'
+        z_m:
+          type: array
+          items:
+            $ref: '#/components/schemas/ECScalarHex'
+        z_rho:
+          type: array
+          items:
+            $ref: '#/components/schemas/ECScalarHex'
+        z_gamma:
+          type: array
+          items:
+            $ref: '#/components/schemas/ECScalarHex'
+        challenge:
+          $ref: '#/components/schemas/ECScalarHex'
+
+    ProofConsLinearEC:
+      type: object
+      description: qFold-EC linear constraint proof serialized by Python wire helpers.
+      required: [T, z, challenge]
+      additionalProperties: false
+      properties:
+        T:
+          $ref: '#/components/schemas/ECPointHex'
+        z:
+          $ref: '#/components/schemas/ECScalarHex'
+        challenge:
+          $ref: '#/components/schemas/ECScalarHex'
+
+    ProofConsNonlinearEC:
+      type: object
+      description: qFold-EC non-linear folded multiplication proof object. EC v1 treats this as demonstrative unless a full circuit proof profile is selected.
+      required:
+        - C_E
+        - T_L
+        - T_R
+        - T_O
+        - T_E
+        - T_mul_base
+        - T_mul_cross
+        - z_L
+        - z_R
+        - z_O
+        - z_E
+        - z_gamma_L
+        - z_gamma_R
+        - z_gamma_O
+        - z_rE
+        - z_mul_blind
+        - challenge
+      additionalProperties: false
+      properties:
+        C_E:
+          $ref: '#/components/schemas/ECPointHex'
+        T_L:
+          $ref: '#/components/schemas/ECPointHex'
+        T_R:
+          $ref: '#/components/schemas/ECPointHex'
+        T_O:
+          $ref: '#/components/schemas/ECPointHex'
+        T_E:
+          $ref: '#/components/schemas/ECPointHex'
+        T_mul_base:
+          $ref: '#/components/schemas/ECPointHex'
+        T_mul_cross:
+          $ref: '#/components/schemas/ECPointHex'
+        z_L:
+          $ref: '#/components/schemas/ECScalarHex'
+        z_R:
+          $ref: '#/components/schemas/ECScalarHex'
+        z_O:
+          $ref: '#/components/schemas/ECScalarHex'
+        z_E:
+          $ref: '#/components/schemas/ECScalarHex'
+        z_gamma_L:
+          $ref: '#/components/schemas/ECScalarHex'
+        z_gamma_R:
+          $ref: '#/components/schemas/ECScalarHex'
+        z_gamma_O:
+          $ref: '#/components/schemas/ECScalarHex'
+        z_rE:
+          $ref: '#/components/schemas/ECScalarHex'
+        z_mul_blind:
+          $ref: '#/components/schemas/ECScalarHex'
+        challenge:
+          $ref: '#/components/schemas/ECScalarHex'
+
+    NessaProofEC:
+      type: object
+      description: Complete qFold-EC proof object as represented by the Python NessaProof dataclass.
+      required: [C_star, V_list, pi_link, N, d]
+      additionalProperties: false
+      properties:
+        C_star:
+          $ref: '#/components/schemas/ECPointHex'
+        V_list:
+          type: array
+          items:
+            $ref: '#/components/schemas/ECPointHex'
+        pi_link:
+          $ref: '#/components/schemas/ProofLinkEC'
+        pi_cons_linear:
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/ProofConsLinearEC'
+        pi_cons_nonlinear:
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/ProofConsNonlinearEC'
+        N:
+          type: integer
+        d:
+          type: integer
+
+    BenchmarkResult:
+      type: object
+      description: qFold-EC benchmark and verification result metrics.
+      required:
+        - N
+        - d
+        - gen_derive_ms
+        - commit_ms
+        - transcript_ms
+        - fold_ms
+        - nonlinear_fold_ms
+        - prove_link_ms
+        - prove_cons_ms
+        - verify_link_ms
+        - verify_cons_ms
+        - total_prove_ms
+        - total_verify_ms
+        - proof_size_bytes
+        - folding_check_ok
+        - link_verify_ok
+        - cons_verify_ok
+      additionalProperties: false
+      properties:
+        N:
+          type: integer
+        d:
+          type: integer
+        gen_derive_ms:
+          type: number
+        commit_ms:
+          type: number
+        transcript_ms:
+          type: number
+        fold_ms:
+          type: number
+        nonlinear_fold_ms:
+          type: number
+        prove_link_ms:
+          type: number
+        prove_cons_ms:
+          type: number
+        verify_link_ms:
+          type: number
+        verify_cons_ms:
+          type: number
+        total_prove_ms:
+          type: number
+        total_verify_ms:
+          type: number
+        proof_size_bytes:
+          type: integer
+        folding_check_ok:
+          type: boolean
+        link_verify_ok:
+          type: boolean
+        cons_verify_ok:
+          type: boolean
+
+    ProtocolFlowEC:
+      type: object
+      description: JSON-compatible projection of the qFold-EC ProtocolFlow dataclass. Public wire exports are FlowFoldedObject and FlowProofPayload.
+      additionalProperties: false
+      properties:
+        result:
+          $ref: '#/components/schemas/BenchmarkResult'
+        gens:
+          type: object
+          additionalProperties: true
+        events:
+          type: array
+          items:
+            type: array
+            items:
+              type: integer
+        commitments:
+          type: array
+          items:
+            $ref: '#/components/schemas/ECPointHex'
+        tags:
+          type: object
+          additionalProperties: true
+        tags_hash:
+          $ref: '#/components/schemas/Hex64'
+        policy_compiled:
+          $ref: '#/components/schemas/HexString'
+        transcript_roots:
+          type: array
+          items:
+            $ref: '#/components/schemas/Hex64'
+        alphas:
+          type: array
+          items:
+            $ref: '#/components/schemas/ECScalarHex'
+        fold_weights:
+          type: array
+          items:
+            $ref: '#/components/schemas/ECScalarHex'
+        C_star:
+          $ref: '#/components/schemas/ECPointHex'
+        m_star:
+          type: array
+          items:
+            $ref: '#/components/schemas/ECScalarHex'
+        rho_star:
+          type: array
+          items:
+            $ref: '#/components/schemas/ECScalarHex'
+        V_list:
+          type: array
+          items:
+            $ref: '#/components/schemas/ECPointHex'
+        transcript_context:
+          $ref: '#/components/schemas/Hex64'
+        proof:
+          $ref: '#/components/schemas/NessaProofEC'
+        encoding_id:
+          type: string
+        policy_id:
+          type: string
+        linear_constraint_coeffs:
+          type: array
+          nullable: true
+          items:
+            type: integer
+        linear_constraint_target:
+          type: integer
+          nullable: true
+        linear_constraint_W:
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/ECPointHex'
+        proof_context_label:
+          $ref: '#/components/schemas/OptionalHex64'
+        L_star_val:
+          type: integer
+        R_star_val:
+          type: integer
+        O_star_val:
+          type: integer
+        E_star_val:
+          type: integer
+
+    FlowFoldedObject:
+      type: object
+      description: JSON object returned by the Python flow_folded_object helper and sent to verifiers.
+      required: [N, d, tags, policy_compiled, commitments, tags_hash, final_root, C_star, V_list, proof_context_label, proof_size_bytes]
+      additionalProperties: true
+      properties:
+        N:
+          type: integer
+        d:
+          type: integer
+        tags:
+          type: object
+          additionalProperties: true
+        policy_compiled:
+          $ref: '#/components/schemas/HexString'
+        commitments:
+          type: array
+          items:
+            $ref: '#/components/schemas/ECPointHex'
+        tags_hash:
+          $ref: '#/components/schemas/Hex64'
+        final_root:
+          $ref: '#/components/schemas/Hex64'
+        C_star:
+          $ref: '#/components/schemas/ECPointHex'
+        V_list:
+          type: array
+          items:
+            $ref: '#/components/schemas/ECPointHex'
+        proof_context_label:
+          $ref: '#/components/schemas/OptionalHex64'
+        proof_size_bytes:
+          type: integer
+        weight_profile:
+          type: string
+        selected_row_count:
+          type: integer
+        material_preview:
+          type: object
+          additionalProperties: true
+
+    FlowProofPayload:
+      type: object
+      description: JSON proof payload returned by the Python flow_proof_payload helper.
+      required: [N, d, pi_link, pi_cons_linear]
+      additionalProperties: false
+      properties:
+        N:
+          type: integer
+        d:
+          type: integer
+        pi_link:
+          $ref: '#/components/schemas/ProofLinkEC'
+        pi_cons_linear:
+          $ref: '#/components/schemas/ProofConsLinearEC'
+
+    PolicyPayload:
+      type: object
+      description: Application policy payload used by qFold-EC wallet bundles and ASC campaign bundles.
+      required: [name, encoding_id]
+      additionalProperties: true
+      properties:
+        name:
+          type: string
+        encoding_id:
+          type: string
+        linear_constraint_coeffs:
+          type: array
+          items:
+            type: integer
+        linear_constraint_target:
+          type: integer
+        campaign_id:
+          type: string
+        weight_profile:
+          type: string
+        pseudonym_scope:
+          type: string
+        verifier_semantics:
+          type: string
+
+    WalletBundle:
+      type: object
+      description: qFold-EC bundle shape compatible with app.VerifyFolded(policy, folded_object, proof).
+      required: [version, engine, allowed, reason_codes, policy]
+      additionalProperties: true
+      properties:
+        version:
+          type: string
+        engine:
+          type: string
+        allowed:
+          type: boolean
+        reason_codes:
+          type: array
+          items:
+            type: string
+        policy:
+          $ref: '#/components/schemas/PolicyPayload'
+        request:
+          $ref: '#/components/schemas/ASCProofRequestContext'
+        folded_object:
+          $ref: '#/components/schemas/FlowFoldedObject'
+        proof:
+          $ref: '#/components/schemas/FlowProofPayload'
+        user_summary:
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/ASCUserSummary'
+
+    MetadataProfile:
+      type: object
+      description: ASC ad metadata profile used by Go API and Python ASC demo.
+      required: [age_band, interest_code, location_tier, device_class, browsing_segment, income_bracket, engagement_level, consent_flags]
+      additionalProperties: false
+      properties:
+        age_band:
+          type: integer
+          minimum: 0
+          maximum: 15
+        interest_code:
+          type: integer
+          minimum: 0
+        location_tier:
+          type: integer
+          minimum: 0
+          maximum: 7
+        device_class:
+          type: integer
+          minimum: 0
+          maximum: 7
+        browsing_segment:
+          type: integer
+          minimum: 0
+        income_bracket:
+          type: integer
+          minimum: 0
+          maximum: 15
+        engagement_level:
+          type: integer
+          minimum: 0
+          maximum: 100
+        consent_flags:
+          type: integer
+          minimum: 0
+          maximum: 65535
+
+    AdMetadataProfile:
+      description: Python ASC AdMetadataProfile dataclass; same wire shape as the Go MetadataProfile.
+      allOf:
+        - $ref: '#/components/schemas/MetadataProfile'
+
+    UpdateMetadataRequest:
+      description: Go updateMetadataRequest body; same JSON shape as MetadataProfile.
+      allOf:
+        - $ref: '#/components/schemas/MetadataProfile'
+
+    AdCampaign:
+      type: object
+      description: ASC ad campaign object from the Python demo and Go campaignConfig request shape.
+      required: [campaign_id, verifier_id, campaign_window, weight_profile]
+      additionalProperties: false
+      properties:
+        campaign_id:
+          type: string
+        verifier_id:
+          type: string
+        campaign_window:
+          type: string
+        weight_profile:
+          type: string
+        required_consent_mask:
+          type: integer
+          default: 0
+        min_age_band:
+          type: integer
+          default: 0
+        pseudonym_scope:
+          type: string
+          default: per_verifier
+
+    CampaignConfig:
+      description: Go campaignConfig object; same JSON shape as the Python AdCampaign dataclass.
+      allOf:
+        - $ref: '#/components/schemas/AdCampaign'
+
+    ASCProofRequestContext:
+      type: object
+      description: ASC bundle request context. The verifier recomputes context_digest from campaign, pseudonym, nullifier, and row_count.
+      required: [campaign_id, verifier, context_digest]
+      additionalProperties: false
+      properties:
+        campaign_id:
+          type: string
+        verifier:
+          type: string
+        context_digest:
+          type: string
+          pattern: '^$|^[0-9a-fA-F]{128}$'
+          description: Empty string for denied bundles; 64-byte hex digest for allowed bundles.
+
+    ASCTimings:
+      type: object
+      additionalProperties: false
+      properties:
+        commit_ms:
+          type: number
+        transcript_ms:
+          type: number
+        fold_ms:
+          type: number
+        prove_core_ms:
+          type: number
+        verify_core_ms:
+          type: number
+        prove_end_to_end_ms:
+          type: number
+
+    ASCMeta:
+      type: object
+      description: ASC verifier-facing metadata carried on proof bundles after redaction.
+      required: [campaign_id, verifier_id, campaign_window, weight_profile, pseudonym_scope, pseudonym, nullifier, row_count]
+      additionalProperties: true
+      properties:
+        campaign_id:
+          type: string
+        verifier_id:
+          type: string
+        campaign_window:
+          type: string
+        weight_profile:
+          type: string
+        pseudonym_scope:
+          type: string
+        pseudonym:
+          $ref: '#/components/schemas/Hex32'
+        nullifier:
+          $ref: '#/components/schemas/Hex32'
+        row_count:
+          type: integer
+          minimum: 0
+        timings:
+          $ref: '#/components/schemas/ASCTimings'
+
+    ASCUserSummary:
+      type: object
+      description: Local/user-facing summary object. Redactors strip sensitive integrator metadata before wire transmission where applicable.
+      additionalProperties: true
+      properties:
+        title:
+          type: string
+        one_line:
+          type: string
+        integrator_metadata:
+          type: object
+          additionalProperties: true
+
+    ASCProofBundleWire:
+      allOf:
+        - $ref: '#/components/schemas/WalletBundle'
+        - type: object
+          required: [request, asc_meta]
+          properties:
+            asc_meta:
+              $ref: '#/components/schemas/ASCMeta'
+
+    AdVerificationReceipt:
+      type: object
+      description: ASC verifier receipt returned after verify_targeting.
+      required: [campaign_id, accepted, reason_codes, verify_ms, proof_size_bytes, pseudonym, nullifier, proof_valid, eligibility_valid]
+      additionalProperties: false
+      properties:
+        campaign_id:
+          type: string
+        accepted:
+          type: boolean
+        reason_codes:
+          type: array
+          items:
+            type: string
+        verify_ms:
+          type: number
+        proof_size_bytes:
+          type: integer
+        pseudonym:
+          type: string
+        nullifier:
+          type: string
+        proof_valid:
+          type: boolean
+        eligibility_valid:
+          type: boolean
+        details:
+          type: object
+          additionalProperties: true
+
+    SyntheticUser:
+      type: object
+      description: Python ASC SyntheticUser dataclass used for generated demo datasets.
+      required: [user_label, segment, metadata]
+      additionalProperties: false
+      properties:
+        user_label:
+          type: string
+        segment:
+          type: string
+        metadata:
+          $ref: '#/components/schemas/AdMetadataProfile'
+
+    CreateWalletRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        user_label:
+          type: string
+        device_label:
+          type: string
+        private_key_hex:
+          $ref: '#/components/schemas/HexString'
+
+    WalletCreateResponse:
+      type: object
+      required: [wallet_id, user_label, device_label, public_key_hex, private_key_hex, created_at]
+      additionalProperties: false
+      properties:
+        wallet_id:
+          type: string
+        user_label:
+          type: string
+        device_label:
+          type: string
+        public_key_hex:
+          $ref: '#/components/schemas/HexString'
+        private_key_hex:
+          $ref: '#/components/schemas/HexString'
+        created_at:
+          type: string
+          format: date-time
+
+    WalletGetResponse:
+      type: object
+      required: [wallet_id, user_label, device_label, public_key_hex, has_metadata, created_at]
+      additionalProperties: false
+      properties:
+        wallet_id:
+          type: string
+        user_label:
+          type: string
+        device_label:
+          type: string
+        public_key_hex:
+          $ref: '#/components/schemas/HexString'
+        has_metadata:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+
+    SelectiveDisclosureRequest:
+      type: object
+      description: Go API request object that lists dotted response fields allowed to be returned.
+      required: [fields]
+      additionalProperties: false
+      properties:
+        fields:
+          type: array
+          items:
+            type: string
+
+    VerifierCentricFlowRequest:
+      type: object
+      required: [wallet_ids, campaign]
+      additionalProperties: false
+      properties:
+        wallet_ids:
+          type: array
+          items:
+            type: string
+        campaign:
+          $ref: '#/components/schemas/CampaignConfig'
+        deterministic:
+          type: boolean
+          default: true
+        target_rows:
+          type: integer
+        selective_disclosure:
+          $ref: '#/components/schemas/SelectiveDisclosureRequest'
+
+    UserCentricFlowRequest:
+      type: object
+      required: [wallet_id, verifiers]
+      additionalProperties: false
+      properties:
+        wallet_id:
+          type: string
+        verifiers:
+          type: array
+          items:
+            $ref: '#/components/schemas/CampaignConfig'
+        deterministic:
+          type: boolean
+          default: true
+        target_rows:
+          type: integer
+        selective_disclosure:
+          $ref: '#/components/schemas/SelectiveDisclosureRequest'
+
+    BenchmarkRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        mode:
+          type: string
+          enum: [verifier_centric, user_centric]
+          default: verifier_centric
+        sizes:
+          type: array
+          items:
+            type: integer
+        deterministic:
+          type: boolean
+          default: true
+        target_rows:
+          type: integer
+
+    StressRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        mode:
+          type: string
+          enum: [verifier_centric, user_centric]
+          default: verifier_centric
+        concurrency:
+          type: integer
+        iterations:
+          type: integer
+        user_count:
+          type: integer
+        verifier_count:
+          type: integer
+        deterministic:
+          type: boolean
+          default: true
+        target_rows:
+          type: integer
+
+    APIError:
+      type: object
+      required: [error]
+      additionalProperties: false
+      properties:
+        error:
+          type: string
+
+    GatewayPolicy:
+      type: object
+      description: Server-side policy configuration for the payment gateway demo.
+      required: [gateway_id, scope, required_factor_count, usage_budget, rate_window_seconds, max_proofs_per_window]
+      additionalProperties: false
+      properties:
+        gateway_id:
+          type: string
+        scope:
+          type: string
+        required_factor_count:
+          type: integer
+          default: 4
+        usage_budget:
+          type: integer
+          default: 3
+        rate_window_seconds:
+          type: number
+          default: 300.0
+        max_proofs_per_window:
+          type: integer
+          default: 10
+
+    ProverReadiness:
+      type: object
+      description: Local pre-flight result shown to the user and not sent to the verifier.
+      required: [ready, missing_factors, remaining_uses, user_message]
+      additionalProperties: false
+      properties:
+        ready:
+          type: boolean
+        missing_factors:
+          type: array
+          items:
+            type: string
+        remaining_uses:
+          type: integer
+        user_message:
+          type: string
+
+    VerifierReceipt:
+      type: object
+      description: Gateway verifier receipt returned to the prover after successful or failed verification.
+      required: [authorized, receipt_id, timestamp, reason]
+      additionalProperties: false
+      properties:
+        authorized:
+          type: boolean
+        receipt_id:
+          type: string
+        timestamp:
+          type: number
+        reason:
+          type: string
+          enum: [authorized, denied, nonce_mismatch, replay_detected, rate_limited, budget_exhausted, proof_invalid]
+
+    GatewayStatusSummary:
+      type: object
+      required: [gateway_id, usage, nonces_seen, remaining_budget]
+      additionalProperties: false
+      properties:
+        gateway_id:
+          type: string
+        usage:
+          type: string
+        nonces_seen:
+          type: integer
+        remaining_budget:
+          type: integer
+
+    UserProofStory:
+      type: object
+      description: Python use-case narrative dataclass for product/support/audit readers; not a cryptographic guarantee.
+      required:
+        - scenario
+        - template_status
+        - title
+        - one_line
+        - steps_for_end_user
+        - steps_for_integrator
+        - committed_public_semantics
+        - prover_side_secret
+        - verifier_receives
+        - verifier_checks
+        - out_of_scope_v1
+      additionalProperties: false
+      properties:
+        scenario:
+          type: string
+          enum: [login, delegation, credential, revocation, attestation, handshake, ivc]
+        template_status:
+          type: string
+        title:
+          type: string
+        one_line:
+          type: string
+        steps_for_end_user:
+          type: array
+          items:
+            type: string
+        steps_for_integrator:
+          type: array
+          items:
+            type: string
+        committed_public_semantics:
+          type: array
+          items:
+            type: string
+        prover_side_secret:
+          type: array
+          items:
+            type: string
+        verifier_receives:
+          type: array
+          items:
+            type: string
+        verifier_checks:
+          type: array
+          items:
+            type: string
+        out_of_scope_v1:
+          type: array
+          items:
+            type: string
+
+    UsecaseResult:
+      type: object
+      description: Python UsecaseResult dataclass bundling a ProtocolFlow, user-facing story, and integrator metadata.
+      required: [flow, story, integrator_metadata]
+      additionalProperties: false
+      properties:
+        flow:
+          $ref: '#/components/schemas/ProtocolFlowEC'
+        story:
+          $ref: '#/components/schemas/UserProofStory'
+        integrator_metadata:
+          type: object
+          additionalProperties: true
+
+    LoginSessionMaterial:
+      type: object
+      required: [session_pk_label, rp_id, epoch, policy_flags]
+      additionalProperties: false
+      properties:
+        session_pk_label:
+          type: string
+        rp_id:
+          type: string
+        epoch:
+          type: integer
+        policy_flags:
+          type: integer
+
+    DelegationMaterial:
+      type: object
+      required: [child_pk_label, scope_bits, valid_from, valid_until, parent_digest_label]
+      additionalProperties: false
+      properties:
+        child_pk_label:
+          type: string
+        scope_bits:
+          type: integer
+        valid_from:
+          type: integer
+        valid_until:
+          type: integer
+        parent_digest_label:
+          type: string
+
+    CredentialMaterial:
+      type: object
+      required: [age_band, region_code, role_flags, predicate_selector, credential_root_label]
+      additionalProperties: false
+      properties:
+        age_band:
+          type: integer
+        region_code:
+          type: integer
+        role_flags:
+          type: integer
+        predicate_selector:
+          type: integer
+        credential_root_label:
+          type: string
+
+    RevocationMaterial:
+      type: object
+      required: [nullifier_seed_label, use_counter, epoch, accumulator_handle_label]
+      additionalProperties: false
+      properties:
+        nullifier_seed_label:
+          type: string
+        use_counter:
+          type: integer
+        epoch:
+          type: integer
+        accumulator_handle_label:
+          type: string
+
+    AttestationMaterial:
+      type: object
+      required: [measurement_label, firmware_id, app_measurement_label, channel_transcript_label]
+      additionalProperties: false
+      properties:
+        measurement_label:
+          type: string
+        firmware_id:
+          type: string
+        app_measurement_label:
+          type: string
+        channel_transcript_label:
+          type: string
+
+    HandshakeBindingMaterial:
+      type: object
+      required: [transcript_label, sni_or_server_id, ephemeral_key_label, client_binding_tag]
+      additionalProperties: false
+      properties:
+        transcript_label:
+          type: string
+        sni_or_server_id:
+          type: string
+        ephemeral_key_label:
+          type: string
+        client_binding_tag:
+          type: string
+
+  examples:
+    ValidProofRequest:
+      summary: Illustrative product-level proof request; schema placeholder until implemented.
+      value:
+        type: nessa.proof_request
+        version: 1
+        request_id: req_01J0NESSA00000000000000001
+        canonical_request_hash: 8f5e1a6c7b8d9e00112233445566778899aabbccddeeff001122334455667788
+        created_at: '2026-06-02T10:00:00Z'
+        valid_after: '2026-06-02T10:00:00Z'
+        expires_at: '2026-06-02T10:05:00Z'
+        verifier_binding:
+          verifier_id: verifier://ads-harvester
+          application_domain: ads.example
+        requested_claim:
+          claim_id: asc_ad_eligibility
+        proof_profile: NESSA-EC-RISTRETTO255-SHA512-v1
+        context_binding:
+          action_id: campaign://summer-1
+          purpose: campaign eligibility proof
+        nonce_binding:
+          nonce: 7e6df5bb0b6a4f5e8a63f4b859cbb5e1
+          scope: verifier_session
+        disclosure_request:
+          fields: [verification_receipt.accepted, proof_bundle_wire.asc_meta.nullifier]
+        replay_policy:
+          scope: verifier_campaign_epoch
+          one_time: true
+        verifier_request_signature:
+          alg: ed25519
+          sig: example-signature-placeholder
+
+    ValidVerifierResponse:
+      summary: Illustrative product-level verifier response; implemented receipts are AdVerificationReceipt and VerifierReceipt.
+      value:
+        type: nessa.verifier_response
+        version: 1
+        response_id: resp_01J0NESSA00000000000000001
+        original_request_hash: 8f5e1a6c7b8d9e00112233445566778899aabbccddeeff001122334455667788
+        status: accepted
+        verifier_binding:
+          verifier_id: verifier://ads-harvester
+        satisfied_claim_ref: asc_ad_eligibility
+        disclosed_fields:
+          verification_receipt.accepted: true
+        proof_metadata:
+          proof_profile: NESSA-EC-RISTRETTO255-SHA512-v1
+          proof_size_bytes: 1632
+        freshness_metadata:
+          request_expired: false
+          nonce_seen_before: false
+        replay_metadata:
+          replay_check: fresh
+          nullifier: 6cde60f358ed8f38cb92bb7b873b2e9b5144f26c855b731c951b16ed0b84b308
+        privacy_receipt_ref:
+          receipt_hash: 2e0d4bf5cfcdf82d93f55f2c884ed93d90bf0b8f731bcff6d01b103718ed5dd2
+
+    PrivacyReceipt:
+      summary: Illustrative product-level privacy receipt; dedicated schema not implemented yet.
+      value:
+        receipt_id: pr_01J0NESSA00000000000000001
+        receipt_hash: 2e0d4bf5cfcdf82d93f55f2c884ed93d90bf0b8f731bcff6d01b103718ed5dd2
+        original_request_hash: 8f5e1a6c7b8d9e00112233445566778899aabbccddeeff001122334455667788
+        verifier_id: verifier://ads-harvester
+        approved_claim: asc_ad_eligibility
+        disclosed_fields:
+          - verification_receipt.accepted
+        proof_profile_used: NESSA-EC-RISTRETTO255-SHA512-v1
+        timestamp: '2026-06-02T10:00:02Z'
+        expires_at: '2026-06-02T10:05:00Z'
+        retention_notice:
+          policy: local-only-user-receipt
+        local_metadata:
+          display_name: Ad eligibility proof
+
+    ExpiredRequest:
+      summary: Illustrative rejected request where expires_at is in the past.
+      value:
+        type: nessa.proof_request
+        request_id: req_expired_01
+        created_at: '2026-06-02T09:00:00Z'
+        expires_at: '2026-06-02T09:05:00Z'
+        validation_error: expired_request
+
+    MalformedRequest:
+      summary: Illustrative malformed request response.
+      value:
+        error: malformed_request
+        validation_errors:
+          - request_id_missing
+          - verifier_binding_missing
+          - canonical_request_hash_invalid
+
+    VerifierMismatch:
+      summary: Illustrative verifier/context mismatch rejection.
+      value:
+        status: rejected
+        reason_codes:
+          - verifier_id_mismatch
+          - request_context_mismatch
+        expected_verifier: verifier://ads-harvester
+        actual_verifier: verifier://other
+
+    ReplayedResponse:
+      summary: Illustrative replay rejection using a previously seen nullifier or nonce.
+      value:
+        status: rejected
+        reason_codes:
+          - duplicate_nullifier
+          - replay_detected
+        replay_metadata:
+          nonce_seen_before: true
+          replay_scope: verifier_campaign_epoch
+
+    OverDisclosureRejection:
+      summary: Illustrative over-disclosure rejection when fields exceed an allowed disclosure request.
+      value:
+        status: rejected
+        reason_codes:
+          - over_disclosure
+        allowed_fields:
+          - verification_receipt.accepted
+        disclosed_fields:
+          - verification_receipt.accepted
+          - proof_bundle_wire.asc_meta.pseudonym
